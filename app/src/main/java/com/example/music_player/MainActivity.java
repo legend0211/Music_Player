@@ -26,7 +26,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         ImageView imgv = findViewById(R.id.Search);
+
         imgv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
