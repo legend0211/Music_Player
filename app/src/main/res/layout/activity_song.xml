@@ -153,8 +153,8 @@
             android:background="@drawable/play_button_background"
             android:contentDescription="@string/app_name"
             android:padding="12dp"
-            android:src="@drawable/ic_play"
-            app:tint="@color/colorWhite"
+            android:src="@drawable/ic_pause"
+            app:tint="@color/white"
             app:layout_constraintBottom_toTopOf="@id/imageLyrics"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
