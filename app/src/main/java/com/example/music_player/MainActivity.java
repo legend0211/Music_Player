@@ -59,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initialisations();
+        clickables();
+
         int currentApiVersion = Build.VERSION.SDK_INT;
         if(currentApiVersion>=33) {
             requestStoragePermissionForHigherVersions();
@@ -66,9 +70,6 @@ public class MainActivity extends AppCompatActivity {
         else {
             requestStoragePermission();
         }
-
-        initialisations();
-        clickables();
 
 //        getSongs();
     }
