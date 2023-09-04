@@ -187,28 +187,28 @@
             app:layout_constraintTop_toTopOf="@id/buttonPlay" />
 
         <ImageButton
-            android:id="@+id/buttonShuffle"
+            android:id="@+id/buttonFavourites"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="32dp"
             android:background="@null"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_shuffle"
+            android:src="@drawable/ic_favorite_off"
             app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/buttonPlay"/>
+            app:layout_constraintTop_toTopOf="@id/buttonPlay" />
 
         <ImageButton
             android:id="@+id/buttonRepeat"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginEnd="32dp"
             android:background="@null"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_repeat"
+            android:src="@drawable/ic_repeat_off"
             app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/buttonPlay"/>
+            app:layout_constraintTop_toTopOf="@id/buttonPlay" />
 
         <SeekBar
             android:id="@+id/playerSeekBar"

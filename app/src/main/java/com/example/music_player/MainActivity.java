@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView imgv;
     File[] songFolderFiles;
     ArrayList<String> nameOfSongs;
-    HashMap<String, Song> map;
+    ArrayList<Song> songDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         songListView = findViewById(R.id.songsListView);
 
         nameOfSongs = new ArrayList<>();
-        map = new HashMap<>();
+        songDetails = new ArrayList<>();
     }
 
     public void clickables() {
@@ -131,13 +131,12 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 System.out.println("Entered Song");
                 String songName = (String)parent.getItemAtPosition(position);
-                if(map.containsKey(songName)) {
-                    intent = new Intent(MainActivity.this, SongActivity.class);
-                    intent.putExtra("artistName", map.get(songName).artist);
-                    intent.putExtra("songName", map.get(songName).name);
-                    intent.putExtra("songPath", map.get(songName).path);
-                    startActivity(intent);
-                }
+                System.out.println(position);
+
+                intent = new Intent(MainActivity.this, SongActivity.class);
+                intent.putExtra("songList", songDetails);
+                intent.putExtra("position", position);
+                startActivity(intent);
             }
         });
     }
@@ -153,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 song.artist = "Anonymous";
                 song.name = nameOfSongs.get(nameOfSongs.size()-1);
                 song.path = file.getPath();
-                map.put(song.name, song);
+                songDetails.add(song);
             }
         }
 
