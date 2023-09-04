@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class SongActivity extends Activity {
-
     ImageView imagePlayPause;
     TextView textCurrentTime, textTotalDuration;
     SeekBar seekBar;
@@ -54,8 +53,8 @@ public class SongActivity extends Activity {
             public void onClick(View v) {
                 System.out.println("ImagePlayPause Clicked "+mediaPlayer.isPlaying());
                 if (mediaPlayer.isPlaying()) {
-                    duration = mediaPlayer.getCurrentPosition();
                     mediaPlayer.pause();
+                    duration = mediaPlayer.getCurrentPosition();
                     imagePlayPause.setImageResource(R.drawable.ic_play);
                 } else {
                     mediaPlayer.start();
@@ -121,7 +120,7 @@ public class SongActivity extends Activity {
                     updateSeekBar();
                 }
             };
-            handler.postDelayed(runnable, 500);
+            handler.postDelayed(runnable, 100);
         }
         else {
             imagePlayPause.setImageResource(R.drawable.ic_play);
