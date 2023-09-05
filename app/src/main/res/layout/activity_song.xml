@@ -54,7 +54,8 @@
         app:layout_constraintBottom_toBottomOf="@id/viewSupportForAlbumArt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/viewSupportForAlbumArt" />
+        app:layout_constraintTop_toTopOf="@id/viewSupportForAlbumArt"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/textTitle"
@@ -93,6 +94,7 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <ImageView
+        android:id="@+id/backButton"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginStart="20dp"
@@ -109,6 +111,7 @@
         android:layout_marginEnd="20dp"
         android:contentDescription="@string/app_name"
         android:src="@drawable/ic_more"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@id/textNowPlaying"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/textNowPlaying"/>
@@ -125,9 +128,9 @@
             android:id="@+id/textLyrics"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
+            android:paddingBottom="15dp"
             android:gravity="center"
-            android:text="@string/lyrics"
+            android:text="@string/raaga"
             android:textAllCaps="true"
             android:textColor="@color/colorPrimaryText"
             android:textSize="15sp"
@@ -163,7 +166,6 @@
             android:id="@+id/buttonPrevious"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:layout_marginStart="15dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/next_prev_button_background"
             android:contentDescription="@string/app_name"
@@ -171,7 +173,8 @@
             android:src="@drawable/ic_previous"
             app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
             app:layout_constraintEnd_toStartOf="@id/buttonPlay"
-            app:layout_constraintTop_toTopOf="@id/buttonPlay" />
+            app:layout_constraintTop_toTopOf="@id/buttonPlay"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <ImageButton
             android:id="@+id/buttonNext"
@@ -184,7 +187,8 @@
             android:src="@drawable/ic_next"
             app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
             app:layout_constraintStart_toEndOf="@id/buttonPlay"
-            app:layout_constraintTop_toTopOf="@id/buttonPlay" />
+            app:layout_constraintTop_toTopOf="@id/buttonPlay"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <ImageButton
             android:id="@+id/buttonFavourites"
@@ -196,7 +200,8 @@
             android:src="@drawable/ic_favorite_off"
             app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/buttonPlay" />
+            app:layout_constraintTop_toTopOf="@id/buttonPlay"
+            tools:ignore="DuplicateSpeakableTextCheck,TouchTargetSizeCheck" />
 
         <ImageButton
             android:id="@+id/buttonRepeat"
@@ -208,7 +213,8 @@
             android:src="@drawable/ic_repeat_off"
             app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/buttonPlay" />
+            app:layout_constraintTop_toTopOf="@id/buttonPlay"
+            tools:ignore="TouchTargetSizeCheck" />
 
         <SeekBar
             android:id="@+id/playerSeekBar"
@@ -233,7 +239,8 @@
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@id/playerSeekBar"
             app:layout_constraintStart_toStartOf="@id/playerSeekBar"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:id="@+id/textTotalTime"
@@ -247,7 +254,8 @@
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@id/playerSeekBar"
             app:layout_constraintEnd_toEndOf="@id/playerSeekBar"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="HardcodedText" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

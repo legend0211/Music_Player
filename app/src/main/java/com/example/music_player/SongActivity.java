@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class SongActivity extends Activity {
-    ImageView play_pauseButton, previousButton, nextButton, loopButton, favouritesButton;
+    ImageView play_pauseButton, previousButton, nextButton, loopButton, favouritesButton, backButton;
     TextView textCurrentTime, textTotalDuration;
     SeekBar seekBar;
     MediaPlayer mediaPlayer;
@@ -44,6 +44,8 @@ public class SongActivity extends Activity {
     }
 
     public void initialisation() {
+        backButton = findViewById(R.id.backButton);
+
         play_pauseButton = findViewById(R.id.buttonPlay);
         previousButton = findViewById(R.id.buttonPrevious);
         nextButton = findViewById(R.id.buttonNext);
@@ -67,6 +69,13 @@ public class SongActivity extends Activity {
     }
 
     public void clickables() {
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         play_pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -173,6 +182,7 @@ public class SongActivity extends Activity {
             mediaPlayer.setDataSource(songPath);
             mediaPlayer.prepare();
             mediaPlayer.start();
+            play_pauseButton.setImageResource(R.drawable.ic_pause);
             textTotalDuration.setText(millisecondsToMinutesAndSeconds(mediaPlayer.getDuration()));
             seekBar.setMax(mediaPlayer.getDuration());
             textCurrentTime.setText("0:00");
@@ -183,7 +193,6 @@ public class SongActivity extends Activity {
                     playNextSong();
                 }
             });
-
             updateSeekBar();
         }
         catch (IOException e) {

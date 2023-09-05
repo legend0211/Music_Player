@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             requestStoragePermission();
         }
 
-//        getSongs();
+        // getSongs();
     }
 
     @AfterPermissionGranted(READ_STORAGE_PERMISSION_REQUEST)
@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Size = "+songFolderFiles.length);
         if (songFolderFiles != null) {
             for (File file : songFolderFiles) {
-                nameOfSongs.add(file.getName().substring(0,file.getName().length()-4));
+                nameOfSongs.add("  "+file.getName().substring(0,file.getName().length()-4));
                 Song song = new Song();
                 song.artist = "Anonymous";
                 song.name = nameOfSongs.get(nameOfSongs.size()-1);
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, nameOfSongs);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, nameOfSongs);
         songListView.setAdapter(adapter);
     }
 }
