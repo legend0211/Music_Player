@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private final int READ_STORAGE_PERMISSION_REQUEST = 1;
     Intent intent;
     ListView songListView;
-    ImageView imgv;
+    ImageView searchButton;
     File[] songFolderFiles;
     ArrayList<String> nameOfSongs;
     ArrayList<Song> songDetails;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initialisations() {
-        imgv = findViewById(R.id.Search);
+        searchButton = findViewById(R.id.Search);
         songListView = findViewById(R.id.songsListView);
 
         nameOfSongs = new ArrayList<>();
@@ -105,12 +105,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 System.out.println("Entered Song");
-                String songName = (String)parent.getItemAtPosition(position);
+                String songName = (String) parent.getItemAtPosition(position);
                 System.out.println(position);
 
                 intent = new Intent(MainActivity.this, SongActivity.class);
                 intent.putExtra("songList", songDetails);
                 intent.putExtra("position", position);
+                startActivity(intent);
+            }
+        });
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                intent = new Intent(MainActivity.this, SearchActivity.class);
+                intent.putExtra("songList", songDetails);
                 startActivity(intent);
             }
         });

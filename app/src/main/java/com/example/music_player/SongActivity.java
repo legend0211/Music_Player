@@ -22,7 +22,6 @@ public class SongActivity extends Activity {
     int duration, position, favouriteToggler, loopToggler;
     ArrayList<Song> songDetails;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
