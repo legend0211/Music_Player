@@ -23,12 +23,12 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity {
     private final int READ_STORAGE_PERMISSION_REQUEST = 1;
-    Intent intent;
-    ListView songListView;
-    ImageView searchButton;
-    File[] songFolderFiles;
-    ArrayList<String> nameOfSongs;
-    ArrayList<Song> songDetails;
+    static Intent intent;
+    static ListView songListView;
+    static ImageView searchButton;
+    static File[] songFolderFiles;
+    static ArrayList<String> nameOfSongs;
+    static ArrayList<Song> songDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

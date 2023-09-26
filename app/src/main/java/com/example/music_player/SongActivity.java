@@ -1,7 +1,7 @@
 package com.example.music_player;
 
-import android.app.Activity;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -9,18 +9,36 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class SongActivity extends Activity {
-    ImageView play_pauseButton, previousButton, nextButton, loopButton, favouritesButton, backButton;
-    TextView textCurrentTime, textTotalDuration;
-    SeekBar seekBar;
-    MediaPlayer mediaPlayer;
-    Handler handler;
-    TextView textTitle, textArtist;
-    int duration, position, favouriteToggler, loopToggler;
-    ArrayList<Song> songDetails;
+import androidx.fragment.app.FragmentActivity;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+public class SongActivity extends FragmentActivity {
+    static ImageView play_pauseButton, previousButton, nextButton, loopButton, favouritesButton, backButton, upButton;
+    static TextView textCurrentTime, textTotalDuration;
+    static SeekBar seekBar;
+    static MediaPlayer mediaPlayer;
+    static Handler handler;
+    static TextView textTitle, textArtist, textRaaga;
+    static int duration, position, favouriteToggler, loopToggler;
+    static ArrayList<Song> songDetails;
+    static boolean isRaagaVisible = false;
+    static RaagaActivity bottomSheetFragment = new RaagaActivity();
+    public static final MediaType MEDIA_TYPE_AUDIO = MediaType.parse("audio/*");
+    private static final String API_URL = "http://127.0.0.1:5000";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +57,19 @@ public class SongActivity extends Activity {
             String songName = songDetails.get(position).name;
             String songPath = songDetails.get(position).path;
             playSong(artistName, songName, songPath);
+//            File file = new File(songPath);
+//            try {
+//                String str = uploadAudioFile(file);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
         }
     }
 
     public void initialisation() {
         backButton = findViewById(R.id.backButton);
+        upButton = findViewById(R.id.imageUp);
+        textRaaga = findViewById(R.id.textRaaga);
 
         play_pauseButton = findViewById(R.id.buttonPlay);
         previousButton = findViewById(R.id.buttonPrevious);
@@ -63,7 +89,7 @@ public class SongActivity extends Activity {
         favouriteToggler = 0;
         loopToggler = 0;
 
-        mediaPlayer = new MediaPlayer();
+//        mediaPlayer = new MediaPlayer();
         handler = new Handler();
     }
 
@@ -152,6 +178,20 @@ public class SongActivity extends Activity {
             }
         });
 
+        upButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showRaagaInfoBottomSheet();
+            }
+        });
+
+        textRaaga.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showRaagaInfoBottomSheet();
+            }
+        });
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -170,14 +210,24 @@ public class SongActivity extends Activity {
         });
     }
 
+    // Method to show the Raaga info bottom sheet
+    private void showRaagaInfoBottomSheet() {
+        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+    }
+
     public void playSong(String artistName, String songName, String songPath) {
         textTitle.setText(songName);
         textArtist.setText(artistName);
 
         // Create and configure a MediaPlayer to play the selected song
         try {
-            onDestroy();
-            mediaPlayer = new MediaPlayer();
+            if (mediaPlayer == null) {
+                System.out.println("Mediaplayer is new");
+                mediaPlayer = new MediaPlayer();
+            } else {
+                System.out.println("Mediaplayer is not new");
+                mediaPlayer.reset();
+            }
             mediaPlayer.setDataSource(songPath);
             mediaPlayer.prepare();
             mediaPlayer.start();
@@ -241,7 +291,7 @@ public class SongActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mediaPlayer.release();
-        handler.removeCallbacksAndMessages(null);
+//        mediaPlayer.release();
+//        handler.removeCallbacksAndMessages(null);
     }
 }
