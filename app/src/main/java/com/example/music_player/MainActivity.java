@@ -2,7 +2,11 @@ package com.example.music_player;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,22 +17,30 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import android.Manifest;
 import android.widget.Toast;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
 public class MainActivity extends AppCompatActivity {
-    private final int READ_STORAGE_PERMISSION_REQUEST = 1;
+    private final int READ_STORAGE_PERMISSION_REQUEST = 1, NUM = 3;
     static Intent intent;
     static ListView songListView;
-    static ImageView searchButton;
+    static ImageView searchButton, myQueueList, favButton, libraryButton;
     static File[] songFolderFiles;
     static ArrayList<String> nameOfSongs;
     static ArrayList<Song> songDetails;
+    static ArrayList<String> queueSongName = new ArrayList<>();
+    static ArrayList<Song> queueSongDetails = new ArrayList<>();
+    static ArrayList<String> librarySongName = new ArrayList<>();
+    static ArrayList<Song> librarySongDetails = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,17 +57,14 @@ public class MainActivity extends AppCompatActivity {
         else {
             requestStoragePermission();
         }
-
-        // getSongs();
     }
 
     @AfterPermissionGranted(READ_STORAGE_PERMISSION_REQUEST)
     public void requestStoragePermissionForHigherVersions() {
         String perms = Manifest.permission.READ_MEDIA_AUDIO;
         if(EasyPermissions.hasPermissions(this, perms)) {
-            //Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
-            System.out.println("Has storage permission");
             getSongs();
+            System.out.println("Has storage permission");
         }
         else {
             EasyPermissions.requestPermissions(this, "Please grant the storage permission", READ_STORAGE_PERMISSION_REQUEST, perms);
@@ -95,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
     public void initialisations() {
         searchButton = findViewById(R.id.Search);
         songListView = findViewById(R.id.songsListView);
+        myQueueList = findViewById(R.id.myQueueList);
+        favButton = findViewById(R.id.favourites);
+        libraryButton = findViewById(R.id.library);
 
         nameOfSongs = new ArrayList<>();
         songDetails = new ArrayList<>();
@@ -115,6 +127,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        songListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                showOptionsDialog(i);
+                return true;
+            }
+        });
+
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,6 +143,23 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        myQueueList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent = new Intent(MainActivity.this, MyQueueActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        libraryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent = new Intent(MainActivity.this, LibraryActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     public void getSongs() {
@@ -142,5 +179,60 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, nameOfSongs);
         songListView.setAdapter(adapter);
+    }
+
+    private void showOptionsDialog(int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose an action");
+
+        final String[] options = {"Add to Beginning", "Add to End"};
+
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    addToQueueBeginning(position);
+                    break;
+                case 1:
+                    addToQueueEnd(position);
+                    break;
+            }
+        });
+        builder.create().show();
+    }
+
+    private void addToQueueBeginning(int position) {
+        queueSongName.add(0, songDetails.get(position).name);
+        queueSongDetails.add(0, songDetails.get(position));
+        Toast.makeText(getApplicationContext(), "Song Added to Queue Beginning", Toast.LENGTH_SHORT).show();
+    }
+
+    private void addToQueueEnd(int position) {
+        queueSongName.add(songDetails.get(position).name);
+        queueSongDetails.add(songDetails.get(position));
+        Toast.makeText(getApplicationContext(), "Song Added to Queue End", Toast.LENGTH_SHORT).show();
+    }
+
+    private void saveLibrarySongs() {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        Gson gson = new Gson();
+        String librarySongsJson = gson.toJson(librarySongDetails);
+
+        editor.apply();
+    }
+
+    private ArrayList<Song> getLibrarySongs() {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+
+        String librarySongsJson = sharedPreferences.getString("librarySongDetails", "");
+
+        if (!librarySongsJson.isEmpty()) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<ArrayList<Song>>() {}.getType();
+            return gson.fromJson(librarySongsJson, type);
+        }
+
+        return new ArrayList<>(); // Return an empty ArrayList if no data is found
     }
 }

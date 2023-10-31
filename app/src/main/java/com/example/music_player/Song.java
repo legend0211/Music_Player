@@ -6,4 +6,5 @@ public class Song implements Serializable {
     String path;
     String name;
     String artist;
+
 }
