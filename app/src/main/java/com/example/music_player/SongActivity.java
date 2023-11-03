@@ -33,13 +33,13 @@ public class SongActivity extends FragmentActivity {
     static MediaPlayer mediaPlayer;
     static Handler handler;
     static TextView textTitle, textArtist, textRaaga;
-    static int duration, position, favouriteToggler, loopToggler;
+    static int duration, position, loopToggler;
     static ArrayList<Song> songDetails;
-    Song currentSong = new Song();
     static boolean isRaagaVisible = false;
     static RaagaActivity bottomSheetFragment = new RaagaActivity();
     public static final MediaType MEDIA_TYPE_AUDIO = MediaType.parse("audio/*");
     private static final String API_URL = "http://127.0.0.1:5000";
+    static Song currentSong;
 
     static int prev_counter = 1;
 
@@ -51,16 +51,13 @@ public class SongActivity extends FragmentActivity {
         initialisation();
         clickables();
 
-        songDetails = (ArrayList<Song>) getIntent().getSerializableExtra("songList");
+        songDetails = MainActivity.songDetails;
         position = getIntent().getIntExtra("position", -1);
         if(position == -1) {
             Toast.makeText(this,"No Song found", Toast.LENGTH_SHORT).show();
         }
         else {
-            currentSong.artist = songDetails.get(position).artist;
-            currentSong.name = songDetails.get(position).name;
-            currentSong.path = songDetails.get(position).path;
-            playSong(currentSong.artist, currentSong.name, currentSong.path);
+            playSong(songDetails.get(position));
         }
     }
 
@@ -85,7 +82,6 @@ public class SongActivity extends FragmentActivity {
 
         position = -1;
         duration = 0;
-        favouriteToggler = 0;
         loopToggler = 0;
 
         handler = new Handler();
@@ -122,13 +118,11 @@ public class SongActivity extends FragmentActivity {
                 System.out.println("Next Button Clicked");
                 prev_counter = 1;
                 if(MainActivity.queueSongName.size()!=0) {
-                    currentSong.artist = MainActivity.queueSongDetails.get(0).artist;
-                    currentSong.name = MainActivity.queueSongName.get(0);
-                    currentSong.path= MainActivity.queueSongDetails.get(0).path;
-
+                    for(int i=0; i<MainActivity.queueSongDetails.size(); i++)
+                        System.out.print(MainActivity.queueSongDetails.get(i).name +" ");
+                    currentSong = MainActivity.queueSongDetails.remove(0);
                     MainActivity.queueSongName.remove(0);
-                    MainActivity.queueSongDetails.remove(0);
-                    playSong(currentSong.artist, currentSong.name, currentSong.path);
+                    playSong(currentSong);
                 }
             }
         });
@@ -140,20 +134,13 @@ public class SongActivity extends FragmentActivity {
                 if(MainActivity.librarySongName.size()!=0 && prev_counter < MainActivity.librarySongName.size()) {
                     if(!MainActivity.queueSongDetails.get(0).path.equals(currentSong.path)) {
                         MainActivity.queueSongName.add(0, currentSong.name);
-                        Song newSong = new Song();
-                        newSong.path = currentSong.path;
-                        newSong.name = currentSong.name;
-                        newSong.artist = currentSong.artist;
-                        MainActivity.queueSongDetails.add(0, newSong);
+                        MainActivity.queueSongDetails.add(0, currentSong);
                     }
-                    currentSong.artist = MainActivity.librarySongDetails.get(prev_counter).artist;
-                    currentSong.name = MainActivity.librarySongName.get(prev_counter);
-                    currentSong.path = MainActivity.librarySongDetails.get(prev_counter).path;
-
+                    currentSong = MainActivity.librarySongDetails.get(prev_counter);
                     MainActivity.librarySongDetails.remove(prev_counter);
                     MainActivity.librarySongName.remove(prev_counter);
                     prev_counter++;
-                    playSong(currentSong.artist, currentSong.name, currentSong.path);
+                    playSong(currentSong);
                 }
             }
         });
@@ -162,14 +149,29 @@ public class SongActivity extends FragmentActivity {
             @Override
             public void onClick(View v) {
                 System.out.println("Favourites Button Clicked");
-                if(favouriteToggler == 1) {
-                    favouriteToggler = 0;
-                    favouritesButton.setImageResource(R.drawable.ic_favorite_off);
-                }
-                else {
-                    favouriteToggler = 1;
-                    favouritesButton.setImageResource(R.drawable.ic_favorite_on);
-                }
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                executorService.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(currentSong.favourites == true) {
+                            currentSong.favourites = false;
+                            for(int i=0; i<MainActivity.favouritesSongDetails.size(); i++) {
+                                if(MainActivity.favouritesSongDetails.get(i).path.equals(currentSong.path)) {
+                                    MainActivity.favouritesSongDetails.remove(i);
+                                    MainActivity.favouritesSongName.remove(i);
+                                    break;
+                                }
+                            }
+                            favouritesButton.setImageResource(R.drawable.ic_favorite_off);
+                        }
+                        else {
+                            currentSong.favourites = true;
+                            MainActivity.favouritesSongDetails.add(currentSong);
+                            MainActivity.favouritesSongName.add(currentSong.name);
+                            favouritesButton.setImageResource(R.drawable.ic_favorite_on);
+                        }
+                    }
+                });
             }
         });
 
@@ -177,11 +179,7 @@ public class SongActivity extends FragmentActivity {
             @Override
             public void onClick(View view) {
                 MainActivity.queueSongName.add(currentSong.name);
-                Song newSong = new Song();
-                newSong.path = currentSong.path;
-                newSong.name = currentSong.name;
-                newSong.artist = currentSong.artist;
-                MainActivity.queueSongDetails.add(newSong);
+                MainActivity.queueSongDetails.add(currentSong);
                 Toast.makeText(getApplicationContext(), "Song Added to Queue", Toast.LENGTH_SHORT).show();
             }
         });
@@ -236,35 +234,34 @@ public class SongActivity extends FragmentActivity {
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
-    public void playSong(String artistName, String songName, String songPath) {
+    public void playSong(Song newSong) {
         ExecutorService executorServicee = Executors.newSingleThreadExecutor();
         executorServicee.execute(new Runnable() {
             @Override
             public void run() {
-                currentSong.artist = artistName;
-                currentSong.name = songName;
-                currentSong.path = songPath;
+                if(newSong.favourites == false) {
+                    favouritesButton.setImageResource(R.drawable.ic_favorite_off);
+                }
+                else {
+                    favouritesButton.setImageResource(R.drawable.ic_favorite_on);
+                }
                 for (int i = 0; i < MainActivity.librarySongDetails.size(); i++) {
-                    System.out.println(MainActivity.librarySongDetails.get(i).path+"..."+songPath);
-                    if (MainActivity.librarySongDetails.get(i).path.equals(songPath)) {
+                    System.out.println(MainActivity.librarySongDetails.get(i).path+"..."+newSong.path);
+                    if (MainActivity.librarySongDetails.get(i).path.equals(newSong.path)) {
                         MainActivity.librarySongDetails.remove(i);
                         MainActivity.librarySongName.remove(i);
                         break;
                     }
                 }
-                Song newSong = new Song();
-                newSong.path = songPath;
-                newSong.name = songName;
-                newSong.artist = artistName;
                 MainActivity.librarySongDetails.add(0, newSong);
-                MainActivity.librarySongName.add(0, new String(currentSong.name));
+                MainActivity.librarySongName.add(0, newSong.name);
 
                 if (MainActivity.librarySongName.size() > 50) {
                     MainActivity.librarySongName.remove(50);
                     MainActivity.librarySongDetails.remove(50);
                 }
 
-                System.out.println("Current Song = " + currentSong.name);
+                System.out.println("Current Song = " + newSong.name);
                 System.out.println("Prev Song List = " + MainActivity.librarySongName);
                 System.out.println("Next Song List = " + MainActivity.queueSongName);
             }
@@ -275,35 +272,29 @@ public class SongActivity extends FragmentActivity {
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    ArrayList<Song> mixList = new ArrayList<>(songDetails);
-                    long seed = System.nanoTime();
-                    Collections.shuffle(mixList, new Random(seed));
+                    Random random = new Random();
+                    Set<Integer> selectedNumbers = new HashSet<>();
+                    int list_len = 4;
 
-                    int list_len = 6; //Actually 5
-                    List<Song> selectedSongs = mixList.subList(0, list_len);
-                    for (int i = 0; i < list_len; i++) {
-                        if (selectedSongs.get(i).path.equals(songPath)) {
-                            selectedSongs.remove(i);
-                            break;
+                    while (selectedNumbers.size() < list_len) {
+                        int randomNumber = random.nextInt(songDetails.size());
+                        selectedNumbers.add(randomNumber);
+                    }
+
+                    for (int number : selectedNumbers) {
+                        if(!songDetails.get(number).name.equals(newSong.name)) {
+                            MainActivity.queueSongName.add(songDetails.get(number).name);
+                            MainActivity.queueSongDetails.add(songDetails.get(number));
                         }
-                    }
-                    if (list_len == selectedSongs.size()) {
-                        selectedSongs.remove(list_len - 1);
-                    }
-                    for (int i=0; i<selectedSongs.size(); i++) {
-                        MainActivity.queueSongName.add(selectedSongs.get(i).name);
-                        Song newSong = new Song();
-                        newSong.path = selectedSongs.get(i).path;
-                        newSong.name = selectedSongs.get(i).name;
-                        newSong.artist = selectedSongs.get(i).artist;
-                        MainActivity.queueSongDetails.add(newSong);
                     }
                 }
             });
         }
 
-        textTitle.setText(songName);
-        textArtist.setText(artistName);
+        currentSong = newSong;
+
+        textTitle.setText(newSong.name);
+        textArtist.setText(newSong.artist);
 
         // Create and configure a MediaPlayer to play the selected song
         try {
@@ -314,7 +305,7 @@ public class SongActivity extends FragmentActivity {
                 System.out.println("Mediaplayer is not new");
                 mediaPlayer.reset();
             }
-            mediaPlayer.setDataSource(songPath);
+            mediaPlayer.setDataSource(newSong.path);
             mediaPlayer.prepare();
             mediaPlayer.start();
             play_pauseButton.setImageResource(R.drawable.ic_pause);
@@ -337,16 +328,11 @@ public class SongActivity extends FragmentActivity {
 
     public void playNextSong() {
         if(loopToggler == 1) {
-            playSong(currentSong.artist, currentSong.name, currentSong.path);
+            playSong(currentSong);
         }
         else {
-            currentSong.artist = MainActivity.queueSongDetails.get(0).artist;
-            currentSong.name = MainActivity.queueSongName.get(0);
-            currentSong.path = MainActivity.queueSongDetails.get(0).path;
-
             MainActivity.queueSongName.remove(0);
-            MainActivity.queueSongDetails.remove(0);
-            playSong(currentSong.artist, currentSong.name, currentSong.path);
+            playSong(MainActivity.queueSongDetails.remove(0));
         }
     }
 

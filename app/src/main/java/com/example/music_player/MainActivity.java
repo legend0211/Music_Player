@@ -29,7 +29,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 
 public class MainActivity extends AppCompatActivity {
-    private final int READ_STORAGE_PERMISSION_REQUEST = 1, NUM = 3;
+    private final int READ_STORAGE_PERMISSION_REQUEST = 1;
     static Intent intent;
     static ListView songListView;
     static ImageView searchButton, myQueueList, favButton, libraryButton;
@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     static ArrayList<Song> queueSongDetails = new ArrayList<>();
     static ArrayList<String> librarySongName = new ArrayList<>();
     static ArrayList<Song> librarySongDetails = new ArrayList<>();
+    static ArrayList<String> favouritesSongName = new ArrayList<>();
+    static ArrayList<Song> favouritesSongDetails = new ArrayList<>();
 
 
     @Override
@@ -156,6 +158,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 intent = new Intent(MainActivity.this, LibraryActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        favButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent = new Intent(MainActivity.this, FavouritesActivity.class);
                 startActivity(intent);
             }
         });

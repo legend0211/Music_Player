@@ -73,6 +73,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/constraintLayout1">
 
+        <TextView
+            android:id="@+id/Recents"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Recents"
+            android:paddingStart="20dp"
+            android:paddingBottom="3dp"
+            android:textColor="@color/colorPrimaryText"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <ListView
             android:id="@+id/librarySongsListView"
             android:layout_width="match_parent"
@@ -81,7 +94,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@+id/Recents"/>
 
         <TextView
             android:id="@+id/songListPresence"
