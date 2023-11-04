@@ -45,6 +45,7 @@
             android:name=".SongActivity"
             android:theme="@style/FullScreen"
             android:screenOrientation="portrait"
+            android:launchMode="singleTop"
             android:exported="true" >
         </activity>
 
@@ -78,6 +79,13 @@
 
         <activity
             android:name=".RaagaActivity"
+            android:theme="@style/FullScreen"
+            android:screenOrientation="portrait"
+            android:exported="true" >
+        </activity>
+
+        <activity
+            android:name=".MiniPlayerActivity"
             android:theme="@style/FullScreen"
             android:screenOrientation="portrait"
             android:exported="true" >

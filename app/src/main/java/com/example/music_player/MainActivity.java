@@ -2,6 +2,8 @@ package com.example.music_player;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -11,15 +13,22 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import android.Manifest;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -31,8 +40,12 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class MainActivity extends AppCompatActivity {
     private final int READ_STORAGE_PERMISSION_REQUEST = 1;
     static Intent intent;
+    static Handler handler;
+    static TextView textTitle;
+    static ConstraintLayout miniPlayerLayout;
     static ListView songListView;
-    static ImageView searchButton, myQueueList, favButton, libraryButton;
+    static ImageView searchButton, myQueueList, favButton, libraryButton, play_pauseButton;
+    static FrameLayout frameLayout;
     static File[] songFolderFiles;
     static ArrayList<String> nameOfSongs;
     static ArrayList<Song> songDetails;
@@ -59,6 +72,28 @@ public class MainActivity extends AppCompatActivity {
         else {
             requestStoragePermission();
         }
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if(SongActivity.currentSong == null) {
+                    frameLayout.setVisibility(View.GONE);
+                }
+                else {
+                    textTitle.setText(SongActivity.currentSong.name);
+                    frameLayout.setVisibility(View.VISIBLE);
+                }
+                if(SongActivity.mediaPlayer!=null) {
+                    if (!SongActivity.mediaPlayer.isPlaying()) {
+                        play_pauseButton.setImageResource(R.drawable.ic_play);
+                    } else {
+                        play_pauseButton.setImageResource(R.drawable.ic_pause);
+                    }
+                }
+                handler.postDelayed(this, 100);
+            }
+        };
+        handler.postDelayed(runnable, 100);
     }
 
     @AfterPermissionGranted(READ_STORAGE_PERMISSION_REQUEST)
@@ -109,9 +144,16 @@ public class MainActivity extends AppCompatActivity {
         myQueueList = findViewById(R.id.myQueueList);
         favButton = findViewById(R.id.favourites);
         libraryButton = findViewById(R.id.library);
+        frameLayout = findViewById(R.id.miniPlayerContainer);
 
         nameOfSongs = new ArrayList<>();
         songDetails = new ArrayList<>();
+
+        handler = new Handler();
+
+        textTitle = findViewById(R.id.miniTextTitle);
+        play_pauseButton = findViewById(R.id.miniPlayButton);
+        miniPlayerLayout = findViewById(R.id.miniPlayer);
     }
 
     public void clickables() {
@@ -123,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(position);
 
                 intent = new Intent(MainActivity.this, SongActivity.class);
-                intent.putExtra("songList", songDetails);
                 intent.putExtra("position", position);
                 startActivity(intent);
             }
@@ -167,6 +208,34 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 intent = new Intent(MainActivity.this, FavouritesActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        miniPlayerLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, SongActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.putExtra("flag", 1);
+                intent.putExtra("loop", SongActivity.loopToggler);
+                startActivity(intent);
+            }
+        });
+
+        play_pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                System.out.println("play_pauseButton Clicked");
+                if (SongActivity.mediaPlayer.isPlaying()) {
+                    SongActivity.mediaPlayer.pause();
+                    SongActivity.duration = SongActivity.mediaPlayer.getCurrentPosition();
+                    play_pauseButton.setImageResource(R.drawable.ic_play);
+                } else {
+                    SongActivity.mediaPlayer.start();
+                    SongActivity.mediaPlayer.seekTo(SongActivity.duration);
+                    play_pauseButton.setImageResource(R.drawable.ic_pause);
+                    SongActivity.updateSeekBar();
+                }
             }
         });
 
@@ -220,29 +289,5 @@ public class MainActivity extends AppCompatActivity {
         queueSongName.add(songDetails.get(position).name);
         queueSongDetails.add(songDetails.get(position));
         Toast.makeText(getApplicationContext(), "Song Added to Queue End", Toast.LENGTH_SHORT).show();
-    }
-
-    private void saveLibrarySongs() {
-        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        Gson gson = new Gson();
-        String librarySongsJson = gson.toJson(librarySongDetails);
-
-        editor.apply();
-    }
-
-    private ArrayList<Song> getLibrarySongs() {
-        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
-
-        String librarySongsJson = sharedPreferences.getString("librarySongDetails", "");
-
-        if (!librarySongsJson.isEmpty()) {
-            Gson gson = new Gson();
-            Type type = new TypeToken<ArrayList<Song>>() {}.getType();
-            return gson.fromJson(librarySongsJson, type);
-        }
-
-        return new ArrayList<>(); // Return an empty ArrayList if no data is found
     }
 }

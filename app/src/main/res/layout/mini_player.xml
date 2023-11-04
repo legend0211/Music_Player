@@ -1,0 +1,45 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/miniPlayer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/mini_player_background"
+    android:layout_alignParentBottom="true"
+    android:visibility="visible"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/miniTextTitle"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/current_song_title"
+        android:textColor="@color/colorPrimaryText"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:singleLine="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.181"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.485" />
+
+    <ImageButton
+        android:id="@+id/miniPlayButton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_margin="15dp"
+        android:background="@drawable/play_button_background"
+        android:backgroundTint="@color/black"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_pause"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.957"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white"
+        tools:ignore="TouchTargetSizeCheck" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

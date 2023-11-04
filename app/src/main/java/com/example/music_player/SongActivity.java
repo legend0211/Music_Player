@@ -48,16 +48,51 @@ public class SongActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song);
+
         initialisation();
         clickables();
-
         songDetails = MainActivity.songDetails;
-        position = getIntent().getIntExtra("position", -1);
-        if(position == -1) {
-            Toast.makeText(this,"No Song found", Toast.LENGTH_SHORT).show();
+
+        int flag = getIntent().getIntExtra("flag", 0);
+        if(flag == 1) {
+            songAlreadyPlaying();
         }
         else {
-            playSong(songDetails.get(position));
+            position = getIntent().getIntExtra("position", -1);
+            if (position == -1) {
+                Toast.makeText(this, "No Song found", Toast.LENGTH_SHORT).show();
+            } else {
+                playSong(songDetails.get(position));
+            }
+        }
+    }
+
+    public void songAlreadyPlaying() {
+        MainActivity.textTitle.setText(currentSong.name);
+        textTitle.setText(currentSong.name);
+        textArtist.setText(currentSong.artist);
+        textTotalDuration.setText(millisecondsToMinutesAndSeconds(mediaPlayer.getDuration()));
+        seekBar.setMax(mediaPlayer.getDuration());
+        duration = mediaPlayer.getCurrentPosition();
+
+        if (!mediaPlayer.isPlaying()) {
+            play_pauseButton.setImageResource(R.drawable.ic_play);
+        } else {
+            play_pauseButton.setImageResource(R.drawable.ic_pause);
+        }
+        updateSeekBar();
+        if(currentSong.favourites == false) {
+            favouritesButton.setImageResource(R.drawable.ic_favorite_off);
+        }
+        else {
+            favouritesButton.setImageResource(R.drawable.ic_favorite_on);
+        }
+        loopToggler = getIntent().getIntExtra("loop", 0);
+        if(loopToggler == 0) {
+            loopButton.setImageResource(R.drawable.ic_repeat_off);
+        }
+        else {
+            loopButton.setImageResource(R.drawable.ic_repeat_on);
         }
     }
 
@@ -98,7 +133,7 @@ public class SongActivity extends FragmentActivity {
         play_pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("play_pauseButton Clicked");
+//                System.out.println("play_pauseButton Clicked");
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
                     duration = mediaPlayer.getCurrentPosition();
@@ -115,11 +150,11 @@ public class SongActivity extends FragmentActivity {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("Next Button Clicked");
+//                System.out.println("Next Button Clicked");
                 prev_counter = 1;
                 if(MainActivity.queueSongName.size()!=0) {
-                    for(int i=0; i<MainActivity.queueSongDetails.size(); i++)
-                        System.out.print(MainActivity.queueSongDetails.get(i).name +" ");
+//                    for(int i=0; i<MainActivity.queueSongDetails.size(); i++)
+//                        System.out.print(MainActivity.queueSongDetails.get(i).name +" ");
                     currentSong = MainActivity.queueSongDetails.remove(0);
                     MainActivity.queueSongName.remove(0);
                     playSong(currentSong);
@@ -130,7 +165,7 @@ public class SongActivity extends FragmentActivity {
         previousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("Previous Button Clicked");
+//                System.out.println("Previous Button Clicked");
                 if(MainActivity.librarySongName.size()!=0 && prev_counter < MainActivity.librarySongName.size()) {
                     if(!MainActivity.queueSongDetails.get(0).path.equals(currentSong.path)) {
                         MainActivity.queueSongName.add(0, currentSong.name);
@@ -148,7 +183,7 @@ public class SongActivity extends FragmentActivity {
         favouritesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("Favourites Button Clicked");
+//                System.out.println("Favourites Button Clicked");
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                 executorService.execute(new Runnable() {
                     @Override
@@ -187,7 +222,7 @@ public class SongActivity extends FragmentActivity {
         loopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                System.out.println("Loop Button Clicked");
+//                System.out.println("Loop Button Clicked");
                 if(loopToggler == 1) {
                     loopToggler = 0;
                     loopButton.setImageResource(R.drawable.ic_repeat_off);
@@ -220,10 +255,8 @@ public class SongActivity extends FragmentActivity {
                     mediaPlayer.seekTo(progress);
                 }
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {}
-
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
@@ -234,7 +267,7 @@ public class SongActivity extends FragmentActivity {
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
-    public void playSong(Song newSong) {
+    public static void playSong(Song newSong) {
         ExecutorService executorServicee = Executors.newSingleThreadExecutor();
         executorServicee.execute(new Runnable() {
             @Override
@@ -246,7 +279,7 @@ public class SongActivity extends FragmentActivity {
                     favouritesButton.setImageResource(R.drawable.ic_favorite_on);
                 }
                 for (int i = 0; i < MainActivity.librarySongDetails.size(); i++) {
-                    System.out.println(MainActivity.librarySongDetails.get(i).path+"..."+newSong.path);
+//                    System.out.println(MainActivity.librarySongDetails.get(i).path+"..."+newSong.path);
                     if (MainActivity.librarySongDetails.get(i).path.equals(newSong.path)) {
                         MainActivity.librarySongDetails.remove(i);
                         MainActivity.librarySongName.remove(i);
@@ -261,9 +294,9 @@ public class SongActivity extends FragmentActivity {
                     MainActivity.librarySongDetails.remove(50);
                 }
 
-                System.out.println("Current Song = " + newSong.name);
-                System.out.println("Prev Song List = " + MainActivity.librarySongName);
-                System.out.println("Next Song List = " + MainActivity.queueSongName);
+//                System.out.println("Current Song = " + newSong.name);
+//                System.out.println("Prev Song List = " + MainActivity.librarySongName);
+//                System.out.println("Next Song List = " + MainActivity.queueSongName);
             }
         });
 
@@ -299,10 +332,8 @@ public class SongActivity extends FragmentActivity {
         // Create and configure a MediaPlayer to play the selected song
         try {
             if (mediaPlayer == null) {
-                System.out.println("Mediaplayer is new");
                 mediaPlayer = new MediaPlayer();
             } else {
-                System.out.println("Mediaplayer is not new");
                 mediaPlayer.reset();
             }
             mediaPlayer.setDataSource(newSong.path);
@@ -326,7 +357,7 @@ public class SongActivity extends FragmentActivity {
         }
     }
 
-    public void playNextSong() {
+    public static void playNextSong() {
         if(loopToggler == 1) {
             playSong(currentSong);
         }
@@ -337,7 +368,7 @@ public class SongActivity extends FragmentActivity {
     }
 
 
-    public String millisecondsToMinutesAndSeconds(long milliseconds) {
+    public static String millisecondsToMinutesAndSeconds(long milliseconds) {
         int seconds = (int) (milliseconds / 1000);
         int minutes = seconds / 60;
         seconds %= 60;
@@ -345,9 +376,10 @@ public class SongActivity extends FragmentActivity {
         return String.format("%02d:%02d", minutes, seconds);
     }
 
-    public void updateSeekBar() {
+    public static void updateSeekBar() {
         seekBar.setProgress(mediaPlayer.getCurrentPosition());
         textCurrentTime.setText(millisecondsToMinutesAndSeconds(mediaPlayer.getCurrentPosition()));
+        textTotalDuration.setText(millisecondsToMinutesAndSeconds(mediaPlayer.getDuration()));
         if (mediaPlayer.isPlaying()) {
             Runnable runnable = new Runnable() {
                 @Override
