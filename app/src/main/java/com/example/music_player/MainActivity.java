@@ -291,3 +291,4 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Song Added to Queue End", Toast.LENGTH_SHORT).show();
     }
 }
+// some changes
