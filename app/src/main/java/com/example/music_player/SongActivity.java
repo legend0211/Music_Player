@@ -49,10 +49,18 @@ public class SongActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song);
 
+        if(position==-2) {
+            prev_counter = 0;
+        }
+
         initialisation();
         clickables();
         songDetails = MainActivity.songDetails;
 
+        if(prev_counter == 0) {
+            position = -2;
+            prev_counter = 1;
+        }
         int flag = getIntent().getIntExtra("flag", 0);
         if(flag == 1) {
             songAlreadyPlaying();
@@ -61,7 +69,15 @@ public class SongActivity extends FragmentActivity {
             position = getIntent().getIntExtra("position", -1);
             if (position == -1) {
                 Toast.makeText(this, "No Song found", Toast.LENGTH_SHORT).show();
-            } else {
+            }
+            else if(position == -2) {
+                Song uploadedSong = new Song();
+                uploadedSong.name = getIntent().getStringExtra("name");
+                uploadedSong.artist = "NULL";
+                uploadedSong.path = getIntent().getStringExtra("path");
+                playSong(uploadedSong);
+            }
+            else {
                 playSong(songDetails.get(position));
             }
         }
@@ -73,7 +89,6 @@ public class SongActivity extends FragmentActivity {
         textArtist.setText(currentSong.artist);
         textTotalDuration.setText(millisecondsToMinutesAndSeconds(mediaPlayer.getDuration()));
         seekBar.setMax(mediaPlayer.getDuration());
-        duration = mediaPlayer.getCurrentPosition();
 
         if (!mediaPlayer.isPlaying()) {
             play_pauseButton.setImageResource(R.drawable.ic_play);
@@ -136,11 +151,11 @@ public class SongActivity extends FragmentActivity {
 //                System.out.println("play_pauseButton Clicked");
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
-                    duration = mediaPlayer.getCurrentPosition();
                     play_pauseButton.setImageResource(R.drawable.ic_play);
                 } else {
                     mediaPlayer.start();
-                    mediaPlayer.seekTo(duration);
+                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition());
+                    System.out.println(mediaPlayer.getCurrentPosition());
                     play_pauseButton.setImageResource(R.drawable.ic_pause);
                     updateSeekBar();
                 }
@@ -253,6 +268,7 @@ public class SongActivity extends FragmentActivity {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     mediaPlayer.seekTo(progress);
+                    textCurrentTime.setText(millisecondsToMinutesAndSeconds(mediaPlayer.getCurrentPosition()));
                 }
             }
             @Override
@@ -300,7 +316,7 @@ public class SongActivity extends FragmentActivity {
             }
         });
 
-        if(MainActivity.queueSongName.size()==0) {
+        if(MainActivity.queueSongName.size()==0 && position!=-2) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             executorService.execute(new Runnable() {
                 @Override
@@ -343,14 +359,19 @@ public class SongActivity extends FragmentActivity {
             textTotalDuration.setText(millisecondsToMinutesAndSeconds(mediaPlayer.getDuration()));
             seekBar.setMax(mediaPlayer.getDuration());
             textCurrentTime.setText("0:00");
+            updateSeekBar();
 
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    playNextSong();
+                    if(loopToggler==1) {
+                        playNextSong();
+                    }
+                    else if(position!=-2) {
+                        playNextSong();
+                    }
                 }
             });
-            updateSeekBar();
         }
         catch (IOException e) {
             e.printStackTrace();

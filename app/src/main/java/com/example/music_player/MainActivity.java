@@ -1,26 +1,38 @@
 package com.example.music_player;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     static ConstraintLayout miniPlayerLayout;
     static ListView songListView;
     static ImageView searchButton, myQueueList, favButton, libraryButton, play_pauseButton;
+    static Button addButton;
     static FrameLayout frameLayout;
     static File[] songFolderFiles;
     static ArrayList<String> nameOfSongs;
@@ -55,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     static ArrayList<Song> librarySongDetails = new ArrayList<>();
     static ArrayList<String> favouritesSongName = new ArrayList<>();
     static ArrayList<Song> favouritesSongDetails = new ArrayList<>();
+    File file;
 
 
     @Override
@@ -140,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void initialisations() {
         searchButton = findViewById(R.id.Search);
+        addButton = findViewById(R.id.addButtton);
         songListView = findViewById(R.id.songsListView);
         myQueueList = findViewById(R.id.myQueueList);
         favButton = findViewById(R.id.favourites);
@@ -160,10 +175,6 @@ public class MainActivity extends AppCompatActivity {
         songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                System.out.println("Entered Song");
-                String songName = (String) parent.getItemAtPosition(position);
-                System.out.println(position);
-
                 intent = new Intent(MainActivity.this, SongActivity.class);
                 intent.putExtra("position", position);
                 startActivity(intent);
@@ -184,6 +195,16 @@ public class MainActivity extends AppCompatActivity {
                 intent = new Intent(MainActivity.this, SearchActivity.class);
                 intent.putExtra("songList", songDetails);
                 startActivity(intent);
+            }
+        });
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent_upload = new Intent();
+                intent_upload.setType("audio/*");
+                intent_upload.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent_upload,1);
             }
         });
 
@@ -238,8 +259,65 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            Uri fileUri = data.getData();
+
+            if (fileUri != null) {
+                ContentResolver contentResolver = getContentResolver();
+                try {
+                    InputStream inputStream = contentResolver.openInputStream(fileUri);
+                    String fileName = getFileNameFromUri(fileUri);
+
+                    File downloadDir = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+                    if (!downloadDir.exists()) {
+                        downloadDir.mkdirs();
+                    }
+                    File downloadFile = new File(downloadDir, fileName);
+                    OutputStream outputStream = new FileOutputStream(downloadFile);
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    inputStream.close();
+                    outputStream.close();
+
+                    intent = new Intent(MainActivity.this, SongActivity.class);
+                    intent.putExtra("path", downloadFile.getPath());
+                    intent.putExtra("name", downloadFile.getName());
+                    intent.putExtra("position", -2);
+                    startActivity(intent);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "Can't recognize file. Please select again!", Toast.LENGTH_SHORT).show();
+                Intent intent_upload = new Intent();
+                intent_upload.setType("audio/*");
+                intent_upload.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent_upload,1);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private String getFileNameFromUri(Uri uri) {
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        String fileName = null;
+        if (cursor != null && cursor.moveToFirst()) {
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            fileName = cursor.getString(nameIndex);
+            cursor.close();
+        }
+        return fileName;
+    }
+
+
 
     public void getSongs() {
         File songFolder = new File(Environment.getExternalStorageDirectory(), "SongFolder");
