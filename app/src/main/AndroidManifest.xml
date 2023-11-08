@@ -30,15 +30,21 @@
         android:theme="@style/Theme.Music_Player"
         tools:targetApi="28" >
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:theme="@style/FullScreen"
             android:screenOrientation="portrait"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/FullScreen"
+            android:screenOrientation="portrait"
+            android:exported="true" >
         </activity>
 
         <activity
@@ -90,6 +96,7 @@
             android:screenOrientation="portrait"
             android:exported="true" >
         </activity>
+
     </application>
 
 </manifest>
