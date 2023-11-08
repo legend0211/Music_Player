@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1072925909623",
+    "project_id": "raaga-53323",
+    "storage_bucket": "raaga-53323.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1072925909623:android:69eb62d7cdb97739d09c72",
+        "android_client_info": {
+          "package_name": "com.example.music_player"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1072925909623-p4qsucqke4ro00qiqf5tj4u8umdrfhle.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.music_player",
+            "certificate_hash": "025ea16654ebd83d683fe8c02e503b06f5e721d8"
+          }
+        },
+        {
+          "client_id": "1072925909623-fdorqmeaam85e8k5c3eik2qu3d3ii9pp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmfMa2khdtUY8vujeF1LU2SNV0D7gLpa0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1072925909623-fdorqmeaam85e8k5c3eik2qu3d3ii9pp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
