@@ -7,13 +7,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.view.inputmethod.InputMethodManager;
 
 import java.util.ArrayList;
 
@@ -99,7 +98,8 @@ public class SearchActivity extends Activity {
                     if (filteredList.size() == 0) {
                         songPresence.setVisibility(View.VISIBLE);
                     } else {
-                        ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchActivity.this, R.layout.list_item_song, filteredList);
+//                        ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchActivity.this, R.layout.list_item_song, filteredList);
+                        ListViewAdapter adapter = new ListViewAdapter(SearchActivity.this, filteredList);
                         searchSongsListView.setAdapter(adapter);
                         searchSongsListView.setVisibility(View.VISIBLE);
                     }

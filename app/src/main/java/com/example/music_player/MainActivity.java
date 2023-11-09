@@ -1,17 +1,9 @@
 package com.example.music_player;
 
-import static android.content.ContentValues.TAG;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -20,30 +12,25 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.OpenableColumns;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import android.Manifest;
-import android.widget.TextView;
-import android.widget.Toast;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -317,25 +304,77 @@ public class MainActivity extends AppCompatActivity {
         return fileName;
     }
 
-
-
     public void getSongs() {
         File songFolder = new File(Environment.getExternalStorageDirectory(), "SongFolder");
         songFolderFiles = songFolder.listFiles();
         System.out.println("Size = "+songFolderFiles.length);
         if (songFolderFiles != null) {
             for (File file : songFolderFiles) {
-                nameOfSongs.add("  "+file.getName().substring(0,file.getName().length()-4));
+                nameOfSongs.add(file.getName().substring(0,file.getName().length()-4));
                 Song song = new Song();
-                song.artist = "Anonymous";
+                song.artist = "";
                 song.name = nameOfSongs.get(nameOfSongs.size()-1);
                 song.path = file.getPath();
                 songDetails.add(song);
             }
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, nameOfSongs);
+        ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
         songListView.setAdapter(adapter);
+
+//        System.out.println("Database");
+//        FirebaseStorage storage = FirebaseStorage.getInstance();
+//        StorageReference storageRef = storage.getReference();
+//
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        CollectionReference songsCollectionRef = db.collection("Songs");
+//        songsCollectionRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//            @Override
+//            public void onComplete(Task<QuerySnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    for (DocumentSnapshot document : task.getResult()) {
+//                        String documentId = document.getId();
+//                        Map<String, Object> songData = document.getData();
+//                        Song song = new Song();
+//                        song.artist = (String) songData.get("artistName");
+//                        song.name = (String) songData.get("songName");
+//                        song.path = songData.get("storagePath").toString();
+//
+//                        StorageReference pathReference = storageRef.child("Songs/"+song.name+".mp3");
+//                        StorageReference gsReference = storage.getReferenceFromUrl(song.path);
+//                        System.out.println(gsReference.toString());
+//
+//
+//                        songDetails.add(song);
+//                        nameOfSongs.add((String) songData.get("songName"));
+//                        System.out.println(song.path);
+//
+//                        ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
+//                        songListView.setAdapter(adapter);
+//                    }
+//                } else {
+//                    Exception e = task.getException();
+//                    if (e != null) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
+
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getDB(getApplicationContext());
+        ArrayList<FavouriteSong> fav = (ArrayList<FavouriteSong>) databaseHelper.favouriteSongDao().getAllFavoriteSongs();
+        System.out.println("Fav db : "+fav);
+        for(int j=0; j<fav.size(); j++) {
+            for (int i = 0; i < songDetails.size(); i++) {
+                if (songDetails.get(i).path.equals(fav.get(j).getSongPath())) {
+                    songDetails.get(i).favourites = true;
+                    Song song = songDetails.get(i);
+                    MainActivity.favouritesSongDetails.add(song);
+                    MainActivity.favouritesSongName.add(song.name);
+                    System.out.println(song.name);
+                }
+            }
+        }
     }
 
     private void showOptionsDialog(int position) {
@@ -369,4 +408,3 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Song Added to Queue End", Toast.LENGTH_SHORT).show();
     }
 }
-// some changes

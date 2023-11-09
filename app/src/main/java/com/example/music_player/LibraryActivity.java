@@ -153,7 +153,7 @@ public class LibraryActivity extends Activity {
             songPresence.setVisibility(View.VISIBLE);
             librarySongsListView.setVisibility(View.INVISIBLE);
         } else {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.librarySongName);
+            ListViewAdapter adapter = new ListViewAdapter(this, MainActivity.librarySongName);
             librarySongsListView.setAdapter(adapter);
             librarySongsListView.setVisibility(View.VISIBLE);
             songPresence.setVisibility(View.INVISIBLE);

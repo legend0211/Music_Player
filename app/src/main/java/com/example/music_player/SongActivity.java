@@ -1,37 +1,36 @@
 package com.example.music_player;
 
 import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.*;
-
 import androidx.fragment.app.FragmentActivity;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class SongActivity extends FragmentActivity {
     static ImageView play_pauseButton, previousButton, nextButton, loopButton, favouritesButton, backButton, upButton, queueButton;
+    static WebView imageAlbumArt;
     static TextView textCurrentTime, textTotalDuration;
     static SeekBar seekBar;
     static MediaPlayer mediaPlayer;
     static Handler handler;
+    static DatabaseHelper databaseHelper;
     static TextView textTitle, textArtist, textRaaga;
     static int duration, position, loopToggler;
     static ArrayList<Song> songDetails;
@@ -109,12 +108,26 @@ public class SongActivity extends FragmentActivity {
         else {
             loopButton.setImageResource(R.drawable.ic_repeat_on);
         }
+
+        int randomNumber = new Random().nextInt(3) + 1;
+        if(randomNumber==1)
+            imageAlbumArt.loadUrl("file:///android_res/raw/pic1.gif");
+        else if(randomNumber==2)
+            imageAlbumArt.loadUrl("file:///android_res/raw/pic2.gif");
+        else
+            imageAlbumArt.loadUrl("file:///android_res/raw/pic3.gif");
+
+        imageAlbumArt.getSettings().setUseWideViewPort(true);
+        imageAlbumArt.getSettings().setLoadWithOverviewMode(true);
+        imageAlbumArt.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+
     }
 
     public void initialisation() {
         backButton = findViewById(R.id.backButton);
         upButton = findViewById(R.id.imageUp);
         textRaaga = findViewById(R.id.textRaaga);
+        imageAlbumArt = findViewById(R.id.imageAlbumArt);
 
         play_pauseButton = findViewById(R.id.buttonPlay);
         previousButton = findViewById(R.id.buttonPrevious);
@@ -135,6 +148,8 @@ public class SongActivity extends FragmentActivity {
         loopToggler = 0;
 
         handler = new Handler();
+
+        databaseHelper = DatabaseHelper.getDB(this);
     }
 
     public void clickables() {
@@ -151,11 +166,11 @@ public class SongActivity extends FragmentActivity {
 //                System.out.println("play_pauseButton Clicked");
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
+                    duration = mediaPlayer.getCurrentPosition();
                     play_pauseButton.setImageResource(R.drawable.ic_play);
                 } else {
                     mediaPlayer.start();
                     mediaPlayer.seekTo(mediaPlayer.getCurrentPosition());
-                    System.out.println(mediaPlayer.getCurrentPosition());
                     play_pauseButton.setImageResource(R.drawable.ic_pause);
                     updateSeekBar();
                 }
@@ -195,18 +210,47 @@ public class SongActivity extends FragmentActivity {
             }
         });
 
+//        favouritesButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                ExecutorService executorService = Executors.newSingleThreadExecutor();
+//                executorService.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        if(currentSong.favourites == true) {
+//                            currentSong.favourites = false;
+//                            for(int i=0; i<MainActivity.favouritesSongDetails.size(); i++) {
+//                                if(MainActivity.favouritesSongDetails.get(i).path.equals(currentSong.path)) {
+//                                    MainActivity.favouritesSongDetails.remove(i);
+//                                    MainActivity.favouritesSongName.remove(i);
+//                                    break;
+//                                }
+//                            }
+//                            favouritesButton.setImageResource(R.drawable.ic_favorite_off);
+//                        }
+//                        else {
+//                            currentSong.favourites = true;
+//                            MainActivity.favouritesSongDetails.add(currentSong);
+//                            MainActivity.favouritesSongName.add(currentSong.name);
+//                            favouritesButton.setImageResource(R.drawable.ic_favorite_on);
+//                        }
+//                    }
+//                });
+//            }
+//        });
+
         favouritesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                System.out.println("Favourites Button Clicked");
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {
-                        if(currentSong.favourites == true) {
+                        if (currentSong.favourites) {
                             currentSong.favourites = false;
-                            for(int i=0; i<MainActivity.favouritesSongDetails.size(); i++) {
-                                if(MainActivity.favouritesSongDetails.get(i).path.equals(currentSong.path)) {
+                            for (int i = 0; i < MainActivity.favouritesSongDetails.size(); i++) {
+                                if (MainActivity.favouritesSongDetails.get(i).path.equals(currentSong.path)) {
+                                    databaseHelper.favouriteSongDao().delete(new FavouriteSong(mediaPlayer.getDuration(), currentSong.path));
                                     MainActivity.favouritesSongDetails.remove(i);
                                     MainActivity.favouritesSongName.remove(i);
                                     break;
@@ -216,6 +260,7 @@ public class SongActivity extends FragmentActivity {
                         }
                         else {
                             currentSong.favourites = true;
+                            databaseHelper.favouriteSongDao().insert(new FavouriteSong(mediaPlayer.getDuration(), currentSong.path));
                             MainActivity.favouritesSongDetails.add(currentSong);
                             MainActivity.favouritesSongName.add(currentSong.name);
                             favouritesButton.setImageResource(R.drawable.ic_favorite_on);
@@ -224,6 +269,7 @@ public class SongActivity extends FragmentActivity {
                 });
             }
         });
+
 
         queueButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -339,6 +385,19 @@ public class SongActivity extends FragmentActivity {
                 }
             });
         }
+
+        int randomNumber = new Random().nextInt(3) + 1;
+        if(randomNumber==1)
+            imageAlbumArt.loadUrl("file:///android_res/raw/pic1.gif");
+        else if(randomNumber==2)
+            imageAlbumArt.loadUrl("file:///android_res/raw/pic2.gif");
+        else
+            imageAlbumArt.loadUrl("file:///android_res/raw/pic3.gif");
+
+        imageAlbumArt.getSettings().setUseWideViewPort(true);
+        imageAlbumArt.getSettings().setLoadWithOverviewMode(true);
+        imageAlbumArt.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
+
 
         currentSong = newSong;
 

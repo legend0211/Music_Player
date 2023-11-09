@@ -2,17 +2,11 @@ package com.example.music_player;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -46,7 +40,8 @@ public class MyQueueActivity extends Activity {
             queueSongsListView.setVisibility(View.INVISIBLE);
         }
         else {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.queueSongName);
+//            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.queueSongName);
+            ListViewAdapter adapter = new ListViewAdapter(this, MainActivity.queueSongName);
             queueSongsListView.setAdapter(adapter);
             queueSongsListView.setVisibility(View.VISIBLE);
             songPresence.setVisibility(View.INVISIBLE);
@@ -178,7 +173,8 @@ public class MyQueueActivity extends Activity {
             songPresence.setVisibility(View.VISIBLE);
             queueSongsListView.setVisibility(View.INVISIBLE);
         } else {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.queueSongName);
+//            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.queueSongName);
+            ListViewAdapter adapter = new ListViewAdapter(this, MainActivity.queueSongName);
             queueSongsListView.setAdapter(adapter);
             queueSongsListView.setVisibility(View.VISIBLE);
             songPresence.setVisibility(View.INVISIBLE);

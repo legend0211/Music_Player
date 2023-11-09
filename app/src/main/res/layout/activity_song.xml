@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
+    android:background="@color/black"
     tools:context=".SongActivity">
 
     <View
@@ -29,7 +29,6 @@
         android:id="@+id/view1"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/colorHint"
         app:layout_constraintBottom_toTopOf="@id/viewSupportForAlbumArt"
         app:layout_constraintEnd_toStartOf="@id/viewSupportForAlbumArt"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,18 +38,15 @@
         android:id="@+id/view2"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/colorHint"
         app:layout_constraintBottom_toTopOf="@id/viewSupportForBackground"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/view1"
         app:layout_constraintTop_toBottomOf="@id/view1"/>
 
-    <ImageView
+    <WebView
         android:id="@+id/imageAlbumArt"
-        android:layout_width="200dp"
+        android:layout_width="300dp"
         android:layout_height="300dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/album_art"
         app:layout_constraintBottom_toBottomOf="@id/viewSupportForAlbumArt"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,11 +59,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="20dp"
         android:gravity="center"
         android:text="@string/current_song_title"
         android:singleLine="true"
-        android:textColor="@color/colorPrimaryText"
+        android:textColor="@color/golden"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/imageAlbumArt"/>
@@ -79,10 +75,10 @@
         android:gravity="center"
         android:layout_marginTop="2dp"
         android:layout_marginStart="20dp"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="20dp"
         android:text="@string/artist_name"
         android:singleLine="true"
-        android:textColor="@color/colorSecondaryText"
+        android:textColor="@color/golden"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@id/textTitle"/>
 
@@ -93,7 +89,7 @@
         android:layout_marginTop="30dp"
         android:text="@string/now_playing"
         android:textAllCaps="true"
-        android:textColor="@color/colorPrimaryText"
+        android:textColor="@color/golden"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -107,7 +103,8 @@
         android:layout_marginStart="25dp"
         android:contentDescription="@string/app_name"
         android:rotation="-90"
-        android:src="@drawable/ic_up"
+        android:background="@drawable/ic_up"
+        android:backgroundTint="@color/golden"
         app:layout_constraintBottom_toBottomOf="@id/textNowPlaying"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/textNowPlaying"/>
@@ -118,7 +115,8 @@
         android:layout_height="30dp"
         android:layout_marginEnd="25dp"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/ic_queue_music"
+        android:background="@drawable/ic_queue_music"
+        android:backgroundTint="@color/golden"
         app:layout_constraintBottom_toBottomOf="@id/textNowPlaying"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/textNowPlaying"/>
@@ -128,6 +126,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/player_background"
+        android:backgroundTint="#343434"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
@@ -139,10 +138,11 @@
             android:gravity="bottom|center"
             android:text="@string/raaga"
             android:textAllCaps="true"
-            android:textColor="@color/colorPrimaryText"
+            android:textColor="@color/golden"
             android:textSize="15sp"
             android:textStyle="bold"
             android:background="@drawable/player_background_grey"
+            android:backgroundTint="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
         <ImageView
@@ -163,10 +163,11 @@
             android:layout_height="60dp"
             android:layout_marginBottom="30dp"
             android:background="@drawable/play_button_background"
+            android:backgroundTint="@color/golden"
             android:contentDescription="@string/app_name"
             android:padding="12dp"
             android:src="@drawable/ic_pause"
-            app:tint="@color/white"
+            app:tint="@color/black"
             app:layout_constraintBottom_toTopOf="@id/imageUp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
@@ -177,6 +178,7 @@
             android:layout_height="45dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/next_prev_button_background"
+            android:backgroundTint="@color/golden"
             android:contentDescription="@string/app_name"
             android:padding="4dp"
             android:src="@drawable/ic_previous"
@@ -191,6 +193,7 @@
             android:layout_height="45dp"
             android:layout_marginStart="5dp"
             android:background="@drawable/next_prev_button_background"
+            android:backgroundTint="@color/golden"
             android:contentDescription="@string/app_name"
             android:padding="4dp"
             android:src="@drawable/ic_next"
@@ -217,9 +220,9 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginEnd="32dp"
-            android:background="@null"
             android:contentDescription="@string/app_name"
             android:src="@drawable/ic_repeat_off"
+            android:backgroundTint="#343434"
             app:layout_constraintBottom_toBottomOf="@id/buttonPlay"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/buttonPlay"
@@ -234,6 +237,7 @@
             android:layout_marginBottom="25dp"
             android:progress="69"
             android:theme="@style/SeekBarTheme"
+            android:progressBackgroundTint="@color/white"
             app:layout_constraintBottom_toTopOf="@id/buttonPlay" />
 
         <TextView
@@ -244,7 +248,7 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="4dp"
             android:text="2:13"
-            android:textColor="@color/colorPrimaryText"
+            android:textColor="@color/golden"
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@id/playerSeekBar"
             app:layout_constraintStart_toStartOf="@id/playerSeekBar"
@@ -259,7 +263,7 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="4dp"
             android:text="3:12"
-            android:textColor="@color/colorPrimaryText"
+            android:textColor="@color/golden"
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@id/playerSeekBar"
             app:layout_constraintEnd_toEndOf="@id/playerSeekBar"

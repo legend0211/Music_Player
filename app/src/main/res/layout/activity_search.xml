@@ -6,7 +6,7 @@
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
+    android:background="@color/black"
     tools:context=".SearchActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,7 +25,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            app:cardBackgroundColor="@android:color/white"
+            app:cardBackgroundColor="#343434"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -42,7 +42,8 @@
                 android:layout_marginBottom="15dp"
                 android:layout_marginEnd="15dp"
                 android:rotation="-90"
-                android:src="@drawable/ic_up"
+                android:background="@drawable/ic_up"
+                android:backgroundTint="@color/golden"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -58,8 +59,9 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:hint="Search Songs, Raagas"
+                android:textColorHint="@color/golden"
                 android:inputType="text"
-                android:textColor="@color/colorPrimaryText"
+                android:textColor="@color/golden"
                 android:textSize="17sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -94,6 +96,7 @@
             android:layout_height="wrap_content"
             android:visibility="invisible"
             android:text="No Song Found"
+            android:textColor="@color/golden"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

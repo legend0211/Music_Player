@@ -6,6 +6,8 @@
     android:layout_height="wrap_content"
     android:singleLine="true"
     android:ellipsize="end"
+    android:fontFamily="sans-serif"
+    android:textColor="@color/white"
     android:textAppearance="?android:attr/textAppearanceListItemSmall"
     android:gravity="center_vertical"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"

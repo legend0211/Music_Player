@@ -3,11 +3,11 @@ package com.example.music_player;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class FavouritesActivity extends Activity {
@@ -28,6 +29,7 @@ public class FavouritesActivity extends Activity {
     ConstraintLayout miniPlayerLayout;
     Handler handler = new Handler();
     static FrameLayout frameLayout;
+    static DatabaseHelper databaseHelper;
 
 
     @Override
@@ -42,7 +44,8 @@ public class FavouritesActivity extends Activity {
             favouritesSongsListView.setVisibility(View.INVISIBLE);
         }
         else {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.favouritesSongName);
+//            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.favouritesSongName);
+            ListViewAdapter adapter = new ListViewAdapter(this, MainActivity.favouritesSongName);
             favouritesSongsListView.setAdapter(adapter);
             favouritesSongsListView.setVisibility(View.VISIBLE);
             songPresence.setVisibility(View.INVISIBLE);
@@ -81,6 +84,8 @@ public class FavouritesActivity extends Activity {
         textTitle = findViewById(R.id.miniTextTitle);
         play_pauseButton = findViewById(R.id.miniPlayButton);
         miniPlayerLayout = findViewById(R.id.miniPlayer);
+
+        databaseHelper = DatabaseHelper.getDB(this);
     }
 
     public void clickables() {
@@ -142,6 +147,14 @@ public class FavouritesActivity extends Activity {
     }
 
     private void removeItem(int position) {
+        MediaPlayer m = new MediaPlayer();
+        try {
+            m.setDataSource(MainActivity.favouritesSongDetails.get(position).path);
+            m.prepare();
+            databaseHelper.favouriteSongDao().delete(new FavouriteSong(m.getDuration(), MainActivity.favouritesSongDetails.get(position).path));
+        }
+        catch (IOException e) {}
+
         MainActivity.favouritesSongDetails.get(position).favourites = false;
         MainActivity.favouritesSongDetails.remove(position);
         MainActivity.favouritesSongName.remove(position);
@@ -154,7 +167,8 @@ public class FavouritesActivity extends Activity {
             songPresence.setVisibility(View.VISIBLE);
             favouritesSongsListView.setVisibility(View.INVISIBLE);
         } else {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.favouritesSongName);
+//            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.favouritesSongName);
+            ListViewAdapter adapter = new ListViewAdapter(this, MainActivity.favouritesSongName);
             favouritesSongsListView.setAdapter(adapter);
             favouritesSongsListView.setVisibility(View.VISIBLE);
             songPresence.setVisibility(View.INVISIBLE);

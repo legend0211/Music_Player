@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     tools:context=".MainActivity">
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -20,12 +20,12 @@
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="15dp"
             android:layout_marginTop="16dp"
+            android:background="@drawable/music2"
             android:padding="8dp"
-            android:src="@drawable/ic_music"
             app:layout_constraintEnd_toStartOf="@+id/iconName"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -35,28 +35,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:fontFamily="cursive"
-            android:padding="5dp"
-            android:text="Music"
-            android:textSize="30sp"
+            android:fontFamily="sans-serif-black"
+            android:text="Reverie"
+            android:textColor="@color/golden"
+            android:textSize="40sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@+id/icon"
             tools:layout_editor_absoluteX="71dp" />
 
         <ImageView
             android:id="@+id/Search"
-            android:layout_width="38dp"
-            android:layout_height="43dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
             android:padding="5dp"
+            android:background="@drawable/ic_search"
+            android:backgroundTint="@color/golden"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/iconName"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.515"
-            app:srcCompat="@android:drawable/ic_search_category_default" />
+            app:layout_constraintVertical_bias="0.515" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -75,7 +76,9 @@
             android:layout_height="wrap_content"
             android:padding="20dp"
             android:text="Songs"
-            android:textSize="30sp"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/golden"
+            android:textSize="25sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -84,10 +87,11 @@
 
         <Button
             android:id="@+id/addButtton"
-            android:layout_width="43dp"
-            android:layout_height="43dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="22dp"
             android:background="@drawable/ic_add_circle"
+            android:backgroundTint="@color/golden"
             app:layout_constraintBottom_toTopOf="@+id/songsListView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1"
@@ -99,6 +103,10 @@
             android:id="@+id/songsListView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/mini_player_background"
+            android:backgroundTint="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -107,10 +115,9 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
             android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:id="@+id/miniPlayerContainer"
             android:layout_alignParentBottom="true"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -151,7 +158,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:src="@drawable/ic_queue_music"
+            android:background="@drawable/ic_queue_music"
+            android:backgroundTint="@color/golden"
             app:layout_constraintEnd_toStartOf="@+id/library"
             app:layout_constraintStart_toEndOf="@+id/favourites"
             app:layout_constraintTop_toTopOf="parent"
@@ -162,7 +170,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:src="@drawable/ic_library"
+            android:background="@drawable/ic_library"
+            android:backgroundTint="@color/golden"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/myQueueList"
