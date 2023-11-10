@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,6 +23,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class SongActivity extends FragmentActivity {
     static ImageView play_pauseButton, previousButton, nextButton, loopButton, favouritesButton, backButton, upButton, queueButton;
@@ -30,7 +36,8 @@ public class SongActivity extends FragmentActivity {
     static SeekBar seekBar;
     static MediaPlayer mediaPlayer;
     static Handler handler;
-    static DatabaseHelper databaseHelper;
+    static FavouriteHelper favouriteHelper;
+    static LibraryHelper libraryHelper;
     static TextView textTitle, textArtist, textRaaga;
     static int duration, position, loopToggler;
     static ArrayList<Song> songDetails;
@@ -39,8 +46,8 @@ public class SongActivity extends FragmentActivity {
     public static final MediaType MEDIA_TYPE_AUDIO = MediaType.parse("audio/*");
     private static final String API_URL = "http://127.0.0.1:5000";
     static Song currentSong;
-
     static int prev_counter = 1;
+    static String textRaagaInfo = "";
 
 
     @Override
@@ -69,7 +76,7 @@ public class SongActivity extends FragmentActivity {
             if (position == -1) {
                 Toast.makeText(this, "No Song found", Toast.LENGTH_SHORT).show();
             }
-            else if(position == -2) {
+            else if (position == -2) {
                 Song uploadedSong = new Song();
                 uploadedSong.name = getIntent().getStringExtra("name");
                 uploadedSong.artist = "NULL";
@@ -77,7 +84,9 @@ public class SongActivity extends FragmentActivity {
                 playSong(uploadedSong);
             }
             else {
-                playSong(songDetails.get(position));
+                Song newSong = (Song) getIntent().getSerializableExtra("song");
+                System.out.println("newSong: " + newSong.id);
+                playSong(newSong);
             }
         }
     }
@@ -149,7 +158,8 @@ public class SongActivity extends FragmentActivity {
 
         handler = new Handler();
 
-        databaseHelper = DatabaseHelper.getDB(this);
+        favouriteHelper = FavouriteHelper.getDB(this);
+        libraryHelper = LibraryHelper.getDB(this);
     }
 
     public void clickables() {
@@ -202,6 +212,7 @@ public class SongActivity extends FragmentActivity {
                         MainActivity.queueSongDetails.add(0, currentSong);
                     }
                     currentSong = MainActivity.librarySongDetails.get(prev_counter);
+                    libraryHelper.librarySongDao().delete(new LibrarySong(currentSong.id, currentSong.path));
                     MainActivity.librarySongDetails.remove(prev_counter);
                     MainActivity.librarySongName.remove(prev_counter);
                     prev_counter++;
@@ -209,35 +220,6 @@ public class SongActivity extends FragmentActivity {
                 }
             }
         });
-
-//        favouritesButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ExecutorService executorService = Executors.newSingleThreadExecutor();
-//                executorService.execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        if(currentSong.favourites == true) {
-//                            currentSong.favourites = false;
-//                            for(int i=0; i<MainActivity.favouritesSongDetails.size(); i++) {
-//                                if(MainActivity.favouritesSongDetails.get(i).path.equals(currentSong.path)) {
-//                                    MainActivity.favouritesSongDetails.remove(i);
-//                                    MainActivity.favouritesSongName.remove(i);
-//                                    break;
-//                                }
-//                            }
-//                            favouritesButton.setImageResource(R.drawable.ic_favorite_off);
-//                        }
-//                        else {
-//                            currentSong.favourites = true;
-//                            MainActivity.favouritesSongDetails.add(currentSong);
-//                            MainActivity.favouritesSongName.add(currentSong.name);
-//                            favouritesButton.setImageResource(R.drawable.ic_favorite_on);
-//                        }
-//                    }
-//                });
-//            }
-//        });
 
         favouritesButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -250,7 +232,7 @@ public class SongActivity extends FragmentActivity {
                             currentSong.favourites = false;
                             for (int i = 0; i < MainActivity.favouritesSongDetails.size(); i++) {
                                 if (MainActivity.favouritesSongDetails.get(i).path.equals(currentSong.path)) {
-                                    databaseHelper.favouriteSongDao().delete(new FavouriteSong(mediaPlayer.getDuration(), currentSong.path));
+                                    favouriteHelper.favouriteSongDao().delete(new FavouriteSong(currentSong.id, currentSong.path));
                                     MainActivity.favouritesSongDetails.remove(i);
                                     MainActivity.favouritesSongName.remove(i);
                                     break;
@@ -260,7 +242,7 @@ public class SongActivity extends FragmentActivity {
                         }
                         else {
                             currentSong.favourites = true;
-                            databaseHelper.favouriteSongDao().insert(new FavouriteSong(mediaPlayer.getDuration(), currentSong.path));
+                            favouriteHelper.favouriteSongDao().insert(new FavouriteSong(currentSong.id, currentSong.path));
                             MainActivity.favouritesSongDetails.add(currentSong);
                             MainActivity.favouritesSongName.add(currentSong.name);
                             favouritesButton.setImageResource(R.drawable.ic_favorite_on);
@@ -330,38 +312,8 @@ public class SongActivity extends FragmentActivity {
     }
 
     public static void playSong(Song newSong) {
-        ExecutorService executorServicee = Executors.newSingleThreadExecutor();
-        executorServicee.execute(new Runnable() {
-            @Override
-            public void run() {
-                if(newSong.favourites == false) {
-                    favouritesButton.setImageResource(R.drawable.ic_favorite_off);
-                }
-                else {
-                    favouritesButton.setImageResource(R.drawable.ic_favorite_on);
-                }
-                for (int i = 0; i < MainActivity.librarySongDetails.size(); i++) {
-//                    System.out.println(MainActivity.librarySongDetails.get(i).path+"..."+newSong.path);
-                    if (MainActivity.librarySongDetails.get(i).path.equals(newSong.path)) {
-                        MainActivity.librarySongDetails.remove(i);
-                        MainActivity.librarySongName.remove(i);
-                        break;
-                    }
-                }
-                MainActivity.librarySongDetails.add(0, newSong);
-                MainActivity.librarySongName.add(0, newSong.name);
-
-                if (MainActivity.librarySongName.size() > 50) {
-                    MainActivity.librarySongName.remove(50);
-                    MainActivity.librarySongDetails.remove(50);
-                }
-
-//                System.out.println("Current Song = " + newSong.name);
-//                System.out.println("Prev Song List = " + MainActivity.librarySongName);
-//                System.out.println("Next Song List = " + MainActivity.queueSongName);
-            }
-        });
-
+        textRaagaInfo = "";
+//        RaagaActivity.raagaInfoText.setText("Loading...");
         if(MainActivity.queueSongName.size()==0 && position!=-2) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             executorService.execute(new Runnable() {
@@ -397,7 +349,6 @@ public class SongActivity extends FragmentActivity {
         imageAlbumArt.getSettings().setUseWideViewPort(true);
         imageAlbumArt.getSettings().setLoadWithOverviewMode(true);
         imageAlbumArt.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NORMAL);
-
 
         currentSong = newSong;
 
@@ -435,6 +386,61 @@ public class SongActivity extends FragmentActivity {
         catch (IOException e) {
             e.printStackTrace();
         }
+
+        ExecutorService executorServicee = Executors.newSingleThreadExecutor();
+        executorServicee.execute(new Runnable() {
+            @Override
+            public void run() {
+                if(newSong.favourites == false) {
+                    favouritesButton.setImageResource(R.drawable.ic_favorite_off);
+                }
+                else {
+                    favouritesButton.setImageResource(R.drawable.ic_favorite_on);
+                }
+                for (int i = 0; i < MainActivity.librarySongDetails.size(); i++) {
+                    if (MainActivity.librarySongDetails.get(i).path.equals(newSong.path)) {
+                        libraryHelper.librarySongDao().delete(new LibrarySong(currentSong.id, currentSong.path));
+                        MainActivity.librarySongDetails.remove(i);
+                        MainActivity.librarySongName.remove(i);
+                        break;
+                    }
+                }
+                System.out.println("newSong: "+currentSong.id);
+                libraryHelper.librarySongDao().insert(new LibrarySong(currentSong.id, currentSong.path));
+                MainActivity.librarySongDetails.add(0, newSong);
+                MainActivity.librarySongName.add(0, newSong.name);
+            }
+        });
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                ApiService apiService = ApiService.retrofit.create(ApiService.class);
+                File audioFile = new File(currentSong.path);
+                System.out.println("Size = "+audioFile.length());
+                RequestBody requestFile = RequestBody.create(MediaType.parse("audio/*"), audioFile);
+                MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", audioFile.getName(), requestFile);
+                Call<ResponseBody> call = apiService.uploadAudioFile(body);
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                        System.out.println("Response Code: " + response.code());
+                        try {
+                            textRaagaInfo = response.body().string();
+                            RaagaActivity.raagaInfoText.setText(textRaagaInfo);
+                            System.out.println("Response Body: " + textRaagaInfo);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        t.printStackTrace();
+                    }
+                });
+            }
+        });
     }
 
     public static void playNextSong() {

@@ -3,7 +3,6 @@ package com.example.music_player;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -16,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class FavouritesActivity extends Activity {
@@ -29,7 +27,7 @@ public class FavouritesActivity extends Activity {
     ConstraintLayout miniPlayerLayout;
     Handler handler = new Handler();
     static FrameLayout frameLayout;
-    static DatabaseHelper databaseHelper;
+    static FavouriteHelper favouriteHelper;
 
 
     @Override
@@ -85,7 +83,7 @@ public class FavouritesActivity extends Activity {
         play_pauseButton = findViewById(R.id.miniPlayButton);
         miniPlayerLayout = findViewById(R.id.miniPlayer);
 
-        databaseHelper = DatabaseHelper.getDB(this);
+        favouriteHelper = FavouriteHelper.getDB(this);
     }
 
     public void clickables() {
@@ -93,6 +91,15 @@ public class FavouritesActivity extends Activity {
             @Override
             public void onClick(View v) {
                 finish();
+            }
+        });
+        favouritesSongsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent intent = new Intent(FavouritesActivity.this, SongActivity.class);
+                intent.putExtra("song", MainActivity.favouritesSongDetails.get(position));
+                intent.putExtra("position", position);
+                startActivity(intent);
             }
         });
         favouritesSongsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -128,7 +135,6 @@ public class FavouritesActivity extends Activity {
                 }
             }
         });
-
     }
 
     private void showOptionsDialog(int position) {
@@ -147,14 +153,7 @@ public class FavouritesActivity extends Activity {
     }
 
     private void removeItem(int position) {
-        MediaPlayer m = new MediaPlayer();
-        try {
-            m.setDataSource(MainActivity.favouritesSongDetails.get(position).path);
-            m.prepare();
-            databaseHelper.favouriteSongDao().delete(new FavouriteSong(m.getDuration(), MainActivity.favouritesSongDetails.get(position).path));
-        }
-        catch (IOException e) {}
-
+        favouriteHelper.favouriteSongDao().delete(new FavouriteSong(MainActivity.favouritesSongDetails.get(position).id, MainActivity.favouritesSongDetails.get(position).path));
         MainActivity.favouritesSongDetails.get(position).favourites = false;
         MainActivity.favouritesSongDetails.remove(position);
         MainActivity.favouritesSongName.remove(position);

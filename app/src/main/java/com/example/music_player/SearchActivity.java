@@ -22,6 +22,9 @@ public class SearchActivity extends Activity {
     ImageView backButton;
     ListView searchSongsListView;
     TextView songPresence;
+    ArrayList<String> filteredList = new ArrayList<>();
+    ArrayList<Song> filteredListDetails = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +33,7 @@ public class SearchActivity extends Activity {
         initialisation();
         clickables();
 
-        songDetails = (ArrayList<Song>) getIntent().getSerializableExtra("songList");
+        songDetails = MainActivity.songDetails;
         openKeyboard(searchEditText);
     }
 
@@ -59,7 +62,6 @@ public class SearchActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 System.out.println("Entered Song");
-                String songName = (String) parent.getItemAtPosition(position);
                 System.out.println(position);
 
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -69,7 +71,7 @@ public class SearchActivity extends Activity {
                 }
 
                 Intent intent = new Intent(SearchActivity.this, SongActivity.class);
-                intent.putExtra("songList", songDetails);
+                intent.putExtra("song", filteredListDetails.get(position));
                 intent.putExtra("position", position);
                 startActivity(intent);
             }
@@ -88,18 +90,21 @@ public class SearchActivity extends Activity {
 
                 if(!charSequence.toString().equals("")) {
                     String searchText = charSequence.toString().toLowerCase();
-                    ArrayList<String> filteredList = new ArrayList<>();
 
+                    ArrayList<String> fltList = new ArrayList<String>();
+                    ArrayList<Song> fltListDetails = new ArrayList<Song>();
                     for (Song song : songDetails) {
                         if (song.name.toLowerCase().contains(searchText)) {
-                            filteredList.add(song.name);
+                            fltList.add(song.name);
+                            fltListDetails.add(song);
                         }
                     }
+                    filteredListDetails = fltListDetails;
+                    filteredList = fltList;
                     if (filteredList.size() == 0) {
                         songPresence.setVisibility(View.VISIBLE);
                     } else {
-//                        ArrayAdapter<String> adapter = new ArrayAdapter<>(SearchActivity.this, R.layout.list_item_song, filteredList);
-                        ListViewAdapter adapter = new ListViewAdapter(SearchActivity.this, filteredList);
+                        ListViewAdapter adapter = new ListViewAdapter(SearchActivity.this, fltList);
                         searchSongsListView.setAdapter(adapter);
                         searchSongsListView.setVisibility(View.VISIBLE);
                     }

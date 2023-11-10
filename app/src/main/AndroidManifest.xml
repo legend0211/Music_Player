@@ -28,6 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Music_Player"
+        android:usesCleartextTraffic="true"
         tools:targetApi="28" >
         <activity
             android:name=".SplashActivity"

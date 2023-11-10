@@ -3,6 +3,7 @@ package com.example.music_player;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class LibraryActivity extends Activity {
@@ -28,6 +30,8 @@ public class LibraryActivity extends Activity {
     ConstraintLayout miniPlayerLayout;
     Handler handler = new Handler();
     static FrameLayout frameLayout;
+    static LibraryHelper libraryHelper;
+
 
 
     @Override
@@ -81,6 +85,8 @@ public class LibraryActivity extends Activity {
         textTitle = findViewById(R.id.miniTextTitle);
         play_pauseButton = findViewById(R.id.miniPlayButton);
         miniPlayerLayout = findViewById(R.id.miniPlayer);
+
+        libraryHelper = LibraryHelper.getDB(this);
     }
 
     public void clickables() {
@@ -90,7 +96,15 @@ public class LibraryActivity extends Activity {
                 finish();
             }
         });
-
+        librarySongsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent intent = new Intent(LibraryActivity.this, SongActivity.class);
+                intent.putExtra("song", MainActivity.librarySongDetails.get(position));
+                intent.putExtra("position", position);
+                startActivity(intent);
+            }
+        });
         librarySongsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -142,6 +156,13 @@ public class LibraryActivity extends Activity {
     }
 
     private void removeItem(int position) {
+        MediaPlayer m = new MediaPlayer();
+        try {
+            m.setDataSource(MainActivity.librarySongDetails.get(position).path);
+            m.prepare();
+            libraryHelper.librarySongDao().delete(new LibrarySong(MainActivity.librarySongDetails.get(position).id, MainActivity.librarySongDetails.get(position).path));
+        }
+        catch (IOException e) {}
         MainActivity.librarySongDetails.remove(position);
         MainActivity.librarySongName.remove(position);
         Toast.makeText(getApplicationContext(), "Song Removed", Toast.LENGTH_SHORT).show();

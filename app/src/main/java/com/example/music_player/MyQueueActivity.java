@@ -92,8 +92,11 @@ public class MyQueueActivity extends Activity {
 
         queueSongsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent intent = new Intent(MyQueueActivity.this, SongActivity.class);
+                intent.putExtra("song", MainActivity.queueSongDetails.get(position));
+                intent.putExtra("position", position);
+                startActivity(intent);
             }
         });
 

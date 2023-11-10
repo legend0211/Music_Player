@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 intent = new Intent(MainActivity.this, SongActivity.class);
+                intent.putExtra("song", songDetails.get(position));
                 intent.putExtra("position", position);
                 startActivity(intent);
             }
@@ -180,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 intent = new Intent(MainActivity.this, SearchActivity.class);
-                intent.putExtra("songList", songDetails);
                 startActivity(intent);
             }
         });
@@ -308,10 +308,12 @@ public class MainActivity extends AppCompatActivity {
         File songFolder = new File(Environment.getExternalStorageDirectory(), "SongFolder");
         songFolderFiles = songFolder.listFiles();
         System.out.println("Size = "+songFolderFiles.length);
+        int c = 1;
         if (songFolderFiles != null) {
             for (File file : songFolderFiles) {
                 nameOfSongs.add(file.getName().substring(0,file.getName().length()-4));
                 Song song = new Song();
+                song.id = c++;
                 song.artist = "";
                 song.name = nameOfSongs.get(nameOfSongs.size()-1);
                 song.path = file.getPath();
@@ -361,16 +363,31 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
 
-        DatabaseHelper databaseHelper = DatabaseHelper.getDB(getApplicationContext());
-        ArrayList<FavouriteSong> fav = (ArrayList<FavouriteSong>) databaseHelper.favouriteSongDao().getAllFavoriteSongs();
+        FavouriteHelper favouriteHelper = FavouriteHelper.getDB(getApplicationContext());
+        ArrayList<FavouriteSong> fav = (ArrayList<FavouriteSong>) favouriteHelper.favouriteSongDao().getAllFavoriteSongs();
         System.out.println("Fav db : "+fav);
         for(int j=0; j<fav.size(); j++) {
-            for (int i = 0; i < songDetails.size(); i++) {
-                if (songDetails.get(i).path.equals(fav.get(j).getSongPath())) {
+            for(int i=0; i<songDetails.size(); i++) {
+                if(songDetails.get(i).path.equals(fav.get(j).getSongPath())) {
                     songDetails.get(i).favourites = true;
                     Song song = songDetails.get(i);
                     MainActivity.favouritesSongDetails.add(song);
                     MainActivity.favouritesSongName.add(song.name);
+                    System.out.println(song.name);
+                }
+            }
+        }
+
+        LibraryHelper libraryHelper = LibraryHelper.getDB(getApplicationContext());
+        ArrayList<LibrarySong> lib = (ArrayList<LibrarySong>) libraryHelper.librarySongDao().getAllLibrarySongs();
+        System.out.println("Lib db : "+lib);
+        for(int j=lib.size()-1; j>=0; j--) {
+            System.out.println(lib.get(j).getSongPath());
+            for(int i=0; i<songDetails.size(); i++) {
+                if(songDetails.get(i).path.equals(lib.get(j).getSongPath())) {
+                    Song song = songDetails.get(i);
+                    MainActivity.librarySongDetails.add(song);
+                    MainActivity.librarySongName.add(song.name);
                     System.out.println(song.name);
                 }
             }

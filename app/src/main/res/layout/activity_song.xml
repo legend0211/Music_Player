@@ -136,7 +136,7 @@
             android:paddingBottom="15dp"
             android:paddingTop="10dp"
             android:gravity="bottom|center"
-            android:text="@string/raaga"
+            android:text="RAGA ORIGIN (THHAT)"
             android:textAllCaps="true"
             android:textColor="@color/golden"
             android:textSize="15sp"

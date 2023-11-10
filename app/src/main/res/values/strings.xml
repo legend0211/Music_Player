@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">Music_Player</string>
-    <string name="raaga">Raaga</string>
+    <string name="app_name">Raga Reverie</string>
     <string name="current_song_title">Song Title</string>
     <string name="artist_name">Artist Name</string>
     <string name="now_playing">Now Playing</string>
