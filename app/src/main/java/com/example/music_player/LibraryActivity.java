@@ -3,7 +3,6 @@ package com.example.music_player;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -17,7 +16,6 @@ import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class LibraryActivity extends Activity {
@@ -50,6 +48,7 @@ public class LibraryActivity extends Activity {
             librarySongsListView.setAdapter(adapter);
             librarySongsListView.setVisibility(View.VISIBLE);
             songPresence.setVisibility(View.INVISIBLE);
+            updateListView();
         }
 
         Runnable runnable = new Runnable() {
@@ -69,7 +68,6 @@ public class LibraryActivity extends Activity {
                         play_pauseButton.setImageResource(R.drawable.ic_pause);
                     }
                 }
-                updateListView();
                 handler.postDelayed(this, 100);
             }
         };
@@ -156,20 +154,14 @@ public class LibraryActivity extends Activity {
     }
 
     private void removeItem(int position) {
-        MediaPlayer m = new MediaPlayer();
-        try {
-            m.setDataSource(MainActivity.librarySongDetails.get(position).path);
-            m.prepare();
-            libraryHelper.librarySongDao().delete(new LibrarySong(MainActivity.librarySongDetails.get(position).id, MainActivity.librarySongDetails.get(position).path));
-        }
-        catch (IOException e) {}
+        libraryHelper.librarySongDao().delete(new LibrarySong(MainActivity.librarySongDetails.get(position).id, MainActivity.librarySongDetails.get(position).path));
         MainActivity.librarySongDetails.remove(position);
         MainActivity.librarySongName.remove(position);
         Toast.makeText(getApplicationContext(), "Song Removed", Toast.LENGTH_SHORT).show();
         updateListView();
     }
 
-    private void updateListView() {
+    public void updateListView() {
         if (MainActivity.librarySongName.size() == 0) {
             songPresence.setVisibility(View.VISIBLE);
             librarySongsListView.setVisibility(View.INVISIBLE);

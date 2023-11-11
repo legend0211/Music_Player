@@ -107,7 +107,7 @@
             android:layout_marginEnd="15dp"
             android:background="@drawable/mini_player_background"
             android:backgroundTint="@color/black"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/miniPlayerContainer"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/songsHeaderTextView" />

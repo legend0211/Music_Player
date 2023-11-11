@@ -18,13 +18,13 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import java.util.ArrayList;
 
 public class FavouritesActivity extends Activity {
-    ArrayList<Song> songDetails;
-    ImageView backButton;
-    ListView favouritesSongsListView;
-    TextView songPresence;
-    ImageView play_pauseButton;
-    TextView textTitle;
-    ConstraintLayout miniPlayerLayout;
+    static ArrayList<Song> songDetails;
+    static ImageView backButton;
+    static ListView favouritesSongsListView;
+    static TextView songPresence;
+    static ImageView play_pauseButton;
+    static TextView textTitle;
+    static ConstraintLayout miniPlayerLayout;
     Handler handler = new Handler();
     static FrameLayout frameLayout;
     static FavouriteHelper favouriteHelper;
@@ -66,7 +66,6 @@ public class FavouritesActivity extends Activity {
                         play_pauseButton.setImageResource(R.drawable.ic_pause);
                     }
                 }
-                updateListView();
                 handler.postDelayed(this, 100);
             }
         };
@@ -161,17 +160,23 @@ public class FavouritesActivity extends Activity {
         updateListView();
     }
 
-    private void updateListView() {
+    public void updateListView() {
         if (MainActivity.favouritesSongDetails.size() == 0) {
             songPresence.setVisibility(View.VISIBLE);
             favouritesSongsListView.setVisibility(View.INVISIBLE);
         } else {
-//            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_song, MainActivity.favouritesSongName);
             ListViewAdapter adapter = new ListViewAdapter(this, MainActivity.favouritesSongName);
             favouritesSongsListView.setAdapter(adapter);
             favouritesSongsListView.setVisibility(View.VISIBLE);
             songPresence.setVisibility(View.INVISIBLE);
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateListView();
+    }
+
 }
 
