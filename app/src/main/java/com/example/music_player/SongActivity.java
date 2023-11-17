@@ -1,7 +1,14 @@
 package com.example.music_player;
 
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -12,6 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,16 +48,16 @@ public class SongActivity extends FragmentActivity {
     static Handler handler;
     static FavouriteHelper favouriteHelper;
     static LibraryHelper libraryHelper;
-    static TextView textTitle, textArtist, textRaaga;
+    static TextView textTitle, textArtist, textRaagaName, textRaagaTime, textRaagaTherapy;
     static int duration, position, loopToggler;
     static ArrayList<Song> songDetails;
-    static boolean isRaagaVisible = false;
     static RaagaActivity bottomSheetFragment = new RaagaActivity();
     public static final MediaType MEDIA_TYPE_AUDIO = MediaType.parse("audio/*");
     private static final String API_URL = "http://127.0.0.1:5000";
     static Song currentSong;
-    static int prev_counter = 1;
-    static String textRaagaInfo = "";
+    static int prev_counter = 1, downloaded = 0;
+    static String textRaagaInfo = "", raagaName = "", raagaTime = "", raagaTherapy = "";
+    private static long downloadID;
 
 
     @Override
@@ -81,12 +91,12 @@ public class SongActivity extends FragmentActivity {
                 uploadedSong.name = getIntent().getStringExtra("name");
                 uploadedSong.artist = "NULL";
                 uploadedSong.path = getIntent().getStringExtra("path");
-                playSong(uploadedSong);
+                playSong(getApplicationContext(), uploadedSong);
             }
             else {
                 Song newSong = (Song) getIntent().getSerializableExtra("song");
                 System.out.println("newSong: " + newSong.id);
-                playSong(newSong);
+                playSong(getApplicationContext(), newSong);
             }
         }
     }
@@ -134,8 +144,9 @@ public class SongActivity extends FragmentActivity {
 
     public void initialisation() {
         backButton = findViewById(R.id.backButton);
-        upButton = findViewById(R.id.imageUp);
-        textRaaga = findViewById(R.id.textRaaga);
+        textRaagaName = findViewById(R.id.textRaagaName);
+        textRaagaTime = findViewById(R.id.textRaagaTime);
+        textRaagaTherapy = findViewById(R.id.textRaagaTherapy);
         imageAlbumArt = findViewById(R.id.imageAlbumArt);
 
         play_pauseButton = findViewById(R.id.buttonPlay);
@@ -197,7 +208,7 @@ public class SongActivity extends FragmentActivity {
 //                        System.out.print(MainActivity.queueSongDetails.get(i).name +" ");
                     currentSong = MainActivity.queueSongDetails.remove(0);
                     MainActivity.queueSongName.remove(0);
-                    playSong(currentSong);
+                    playSong(getApplicationContext(), currentSong);
                 }
             }
         });
@@ -216,7 +227,7 @@ public class SongActivity extends FragmentActivity {
                     MainActivity.librarySongDetails.remove(prev_counter);
                     MainActivity.librarySongName.remove(prev_counter);
                     prev_counter++;
-                    playSong(currentSong);
+                    playSong(getApplicationContext(), currentSong);
                 }
             }
         });
@@ -277,16 +288,30 @@ public class SongActivity extends FragmentActivity {
             }
         });
 
-        upButton.setOnClickListener(new View.OnClickListener() {
+
+        textRaagaName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                RaagaActivity.ch = 1;
+                textRaagaInfo = raagaName;
                 showRaagaInfoBottomSheet();
             }
         });
 
-        textRaaga.setOnClickListener(new View.OnClickListener() {
+        textRaagaTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                RaagaActivity.ch = 2;
+                textRaagaInfo = raagaTime;
+                showRaagaInfoBottomSheet();
+            }
+        });
+
+        textRaagaTherapy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RaagaActivity.ch = 3;
+                textRaagaInfo = raagaTherapy;
                 showRaagaInfoBottomSheet();
             }
         });
@@ -311,8 +336,13 @@ public class SongActivity extends FragmentActivity {
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
     }
 
-    public static void playSong(Song newSong) {
+    public static void playSong(Context context, Song newSong) {
+        RaagaActivity.ch = 0;
         textRaagaInfo = "";
+        raagaName = "";
+        raagaTherapy = "";
+        raagaTime = "";
+        downloaded = 0;
 //        RaagaActivity.raagaInfoText.setText("Loading...");
         if(MainActivity.queueSongName.size()==0 && position!=-2) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -375,10 +405,10 @@ public class SongActivity extends FragmentActivity {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     if(loopToggler==1) {
-                        playNextSong();
+                        playNextSong(context);
                     }
                     else if(position!=-2) {
-                        playNextSong();
+                        playNextSong(context);
                     }
                 }
             });
@@ -406,7 +436,7 @@ public class SongActivity extends FragmentActivity {
                     }
                 }
                 System.out.println("newSong: "+currentSong.id);
-                libraryHelper.librarySongDao().insert(new LibrarySong(currentSong.id, currentSong.path));
+                libraryHelper.librarySongDao().insert(new LibrarySong(currentSong.id, currentSong.path, System.currentTimeMillis()));
                 MainActivity.librarySongDetails.add(0, newSong);
                 MainActivity.librarySongName.add(0, newSong.name);
             }
@@ -416,8 +446,28 @@ public class SongActivity extends FragmentActivity {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
+                String newPath = "";
+                if(position!=-2 && MainActivity.ch==1) {
+                    newPath = downloadFiles(context);
+                }
+                if(newPath.equals("")) {
+                    newPath = currentSong.path;
+                }
+                System.out.println("New Path : "+newPath);
+
+                File file = new File(newPath);
+                while (downloaded==0) {
+                    try {
+                        System.out.println("Thread");
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("New Path : "+newPath);
+
                 ApiService apiService = ApiService.retrofit.create(ApiService.class);
-                File audioFile = new File(currentSong.path);
+                File audioFile = new File(newPath);
                 System.out.println("Size = "+audioFile.length());
                 RequestBody requestFile = RequestBody.create(MediaType.parse("audio/*"), audioFile);
                 MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", audioFile.getName(), requestFile);
@@ -427,12 +477,38 @@ public class SongActivity extends FragmentActivity {
                     public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                         System.out.println("Response Code: " + response.code());
                         try {
-                            textRaagaInfo = response.body().string();
-                            RaagaActivity.raagaInfoText.setText(textRaagaInfo);
-                            System.out.println("Response Body: " + textRaagaInfo);
+                            JSONObject jsonObject = new JSONObject(response.body().string());
+                            JSONArray thaats = jsonObject.getJSONArray("thaat");
+                            JSONArray times = jsonObject.getJSONArray("time");
+                            JSONArray therapies = jsonObject.getJSONArray("therapy");
+
+                            System.out.println("Thaat: " + thaats.getString(0));
+                            for (int i = 0; i < thaats.length(); i++) {
+                                raagaName += (i+1)+". "+thaats.getString(i)+"\n";
+                            }
+                            if(RaagaActivity.ch == 1) {
+                                textRaagaInfo = raagaName;
+                            }
+                            System.out.println("Time: " + times.getString(0));
+                            for(int i = 0; i < times.length(); i++){
+                                raagaTime += (i+1)+". "+times.getString(i)+"\n";
+                            }
+                            if(RaagaActivity.ch == 2) {
+                                textRaagaInfo = raagaTime;
+                            }
+                            System.out.println("Therapies:");
+                            for (int i = 0; i < therapies.length(); i++) {
+                                raagaTherapy += (i+1)+". "+therapies.getString(i)+"\n";
+                            }
+                            if(RaagaActivity.ch == 3) {
+                                textRaagaInfo = raagaTherapy;
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
+                        } finally {
+                            file.delete();
                         }
+
                     }
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
@@ -443,13 +519,27 @@ public class SongActivity extends FragmentActivity {
         });
     }
 
-    public static void playNextSong() {
+    public static String downloadFiles(Context context) {
+
+        String name = ""+System.currentTimeMillis()+".mp3";
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(currentSong.path));
+        request.allowScanningByMediaScanner();
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+
+        DownloadManager d = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        downloadID = d.enqueue(request);
+        context.registerReceiver(new DownloadReceiver(), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + File.separator + name;
+    }
+
+    public static void playNextSong(Context context) {
         if(loopToggler == 1) {
-            playSong(currentSong);
+            playSong(context, currentSong);
         }
         else {
             MainActivity.queueSongName.remove(0);
-            playSong(MainActivity.queueSongDetails.remove(0));
+            playSong(context, MainActivity.queueSongDetails.remove(0));
         }
     }
 
@@ -483,5 +573,17 @@ public class SongActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    private static class DownloadReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+            if (id == downloadID) {
+                // Download completed, you can perform any post-download actions here
+                downloaded = 1;
+                System.out.println("File download completed.");
+            }
+        }
     }
 }

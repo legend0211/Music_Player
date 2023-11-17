@@ -7,7 +7,7 @@ import androidx.room.Query;
 import java.util.List;
 @Dao
 public interface LibrarySongDao {
-    @Query("select * from library")
+    @Query("select * from library ORDER BY time")
     List<LibrarySong> getAllLibrarySongs();
     @Insert
     void insert(LibrarySong librarySong);

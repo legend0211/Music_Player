@@ -130,32 +130,58 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
-            android:id="@+id/textRaaga"
-            android:layout_width="match_parent"
+            android:id="@+id/textRaagaName"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:paddingBottom="15dp"
             android:paddingTop="10dp"
             android:gravity="bottom|center"
-            android:text="RAGA ORIGIN (THHAT)"
+            android:text="THHAT"
             android:textAllCaps="true"
             android:textColor="@color/golden"
             android:textSize="15sp"
             android:textStyle="bold"
             android:background="@drawable/player_background_grey"
             android:backgroundTint="@color/black"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/textRaagaTime"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-        <ImageView
-            android:id="@+id/imageUp"
-            android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/ic_up"
-            android:visibility="invisible"
-            app:tint="@color/colorPrimary"
-            app:layout_constraintBottom_toTopOf="@id/textRaaga"
+        <TextView
+            android:id="@+id/textRaagaTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/player_background_grey"
+            android:backgroundTint="@color/black"
+            android:gravity="bottom|center"
+            android:paddingTop="10dp"
+            android:paddingBottom="15dp"
+            android:text="PLAYING TIME"
+            android:textAllCaps="true"
+            android:textColor="@color/golden"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/textRaagaTherapy"
+            app:layout_constraintStart_toEndOf="@id/textRaagaName" />
+
+        <TextView
+            android:id="@+id/textRaagaTherapy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingBottom="15dp"
+            android:paddingTop="10dp"
+            android:gravity="bottom|center"
+            android:text="THERAPY"
+            android:textAllCaps="true"
+            android:textColor="@color/golden"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:background="@drawable/player_background_grey"
+            android:backgroundTint="@color/black"
+            app:layout_constraintStart_toEndOf="@id/textRaagaTime"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <ImageButton
             android:id="@+id/buttonPlay"
@@ -168,7 +194,7 @@
             android:padding="12dp"
             android:src="@drawable/ic_pause"
             app:tint="@color/black"
-            app:layout_constraintBottom_toTopOf="@id/imageUp"
+            app:layout_constraintBottom_toTopOf="@id/textRaagaTime"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 

@@ -25,12 +25,22 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Map;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -38,6 +48,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity {
     private final int READ_STORAGE_PERMISSION_REQUEST = 1;
+    private final int WRITE_STORAGE_PERMISSION_REQUEST = 1;
     static Intent intent;
     static Handler handler;
     static TextView textTitle;
@@ -56,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     static ArrayList<String> favouritesSongName = new ArrayList<>();
     static ArrayList<Song> favouritesSongDetails = new ArrayList<>();
     File file;
+    static int ch = 1;
 
 
     @Override
@@ -67,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         clickables();
 
         int currentApiVersion = Build.VERSION.SDK_INT;
+        requestWriteStoragePermission();
         if(currentApiVersion>=33) {
             requestStoragePermissionForHigherVersions();
         }
@@ -123,6 +136,16 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("Doesn't have storage permission");
         }
     }
+
+    @AfterPermissionGranted(WRITE_STORAGE_PERMISSION_REQUEST)
+    public void requestWriteStoragePermission() {
+        String perms = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        if (EasyPermissions.hasPermissions(this, perms)) {
+        } else {
+            EasyPermissions.requestPermissions(this, "Please grant the write storage permission", WRITE_STORAGE_PERMISSION_REQUEST, perms);
+        }
+    }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -305,62 +328,61 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getSongs() {
-        File songFolder = new File(Environment.getExternalStorageDirectory(), "SongFolder");
-        songFolderFiles = songFolder.listFiles();
-        System.out.println("Size = "+songFolderFiles.length);
-        int c = 1;
-        if (songFolderFiles != null) {
-            for (File file : songFolderFiles) {
-                nameOfSongs.add(file.getName().substring(0,file.getName().length()-4));
-                Song song = new Song();
-                song.id = c++;
-                song.artist = "";
-                song.name = nameOfSongs.get(nameOfSongs.size()-1);
-                song.path = file.getPath();
-                songDetails.add(song);
+        if(ch == 0) {
+            File songFolder = new File(Environment.getExternalStorageDirectory(), "SongFolder");
+            songFolderFiles = songFolder.listFiles();
+            System.out.println("Size = " + songFolderFiles.length);
+            int c = 1;
+            if (songFolderFiles != null) {
+                for (File file : songFolderFiles) {
+                    nameOfSongs.add(file.getName().substring(0, file.getName().length() - 4));
+                    Song song = new Song();
+                    song.id = c++;
+                    song.artist = "";
+                    song.name = nameOfSongs.get(nameOfSongs.size() - 1);
+                    song.path = file.getPath();
+                    songDetails.add(song);
+                }
             }
+            ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
+            songListView.setAdapter(adapter);
         }
-        ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
-        songListView.setAdapter(adapter);
 
-//        System.out.println("Database");
-//        FirebaseStorage storage = FirebaseStorage.getInstance();
-//        StorageReference storageRef = storage.getReference();
-//
-//        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        CollectionReference songsCollectionRef = db.collection("Songs");
-//        songsCollectionRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-//            @Override
-//            public void onComplete(Task<QuerySnapshot> task) {
-//                if (task.isSuccessful()) {
-//                    for (DocumentSnapshot document : task.getResult()) {
-//                        String documentId = document.getId();
-//                        Map<String, Object> songData = document.getData();
-//                        Song song = new Song();
-//                        song.artist = (String) songData.get("artistName");
-//                        song.name = (String) songData.get("songName");
-//                        song.path = songData.get("storagePath").toString();
-//
-//                        StorageReference pathReference = storageRef.child("Songs/"+song.name+".mp3");
-//                        StorageReference gsReference = storage.getReferenceFromUrl(song.path);
-//                        System.out.println(gsReference.toString());
-//
-//
-//                        songDetails.add(song);
-//                        nameOfSongs.add((String) songData.get("songName"));
-//                        System.out.println(song.path);
-//
-//                        ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
-//                        songListView.setAdapter(adapter);
-//                    }
-//                } else {
-//                    Exception e = task.getException();
-//                    if (e != null) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
+        if(ch == 1) {
+            System.out.println("Database");
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReference();
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            CollectionReference songsCollectionRef = db.collection("Songs");
+            songsCollectionRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            String documentId = document.getId();
+                            Map<String, Object> songData = document.getData();
+                            Song song = new Song();
+                            song.artist = (String) songData.get("artistName");
+                            song.name = (String) songData.get("songName");
+                            song.path = songData.get("download_link").toString();
+
+                            songDetails.add(song);
+                            nameOfSongs.add((String) songData.get("songName"));
+                            System.out.println(song.path);
+
+                            ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
+                            songListView.setAdapter(adapter);
+                        }
+                    } else {
+                        Exception e = task.getException();
+                        if (e != null) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
 
 
         FavouriteHelper favouriteHelper = FavouriteHelper.getDB(getApplicationContext());

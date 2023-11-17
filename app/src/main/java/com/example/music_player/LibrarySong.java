@@ -2,15 +2,26 @@ package com.example.music_player;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 @Entity(tableName = "library")
 public class LibrarySong {
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private long id;
     @ColumnInfo(name = "path")
     private String songPath;
 
-    LibrarySong(int id, String songPath) {
+    @ColumnInfo(name = "time")
+    private long time;
+
+    LibrarySong(long id, String songPath, long time) {
+        this.songPath = songPath;
+        this.id = id;
+        this.time = time;
+    }
+
+    @Ignore
+    LibrarySong(long id, String songPath) {
         this.songPath = songPath;
         this.id = id;
     }
@@ -24,11 +35,18 @@ public class LibrarySong {
         this.songPath = songPath;
         this.id = id;
     }
-    public int getId() {
+    public long getId() {
         return id;
     }
     public String getSongPath() {
         return songPath;
     }
 
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 }

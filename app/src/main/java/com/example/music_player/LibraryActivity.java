@@ -154,7 +154,7 @@ public class LibraryActivity extends Activity {
     }
 
     private void removeItem(int position) {
-        libraryHelper.librarySongDao().delete(new LibrarySong(MainActivity.librarySongDetails.get(position).id, MainActivity.librarySongDetails.get(position).path));
+        libraryHelper.librarySongDao().delete(new LibrarySong(SongActivity.currentSong.id, MainActivity.librarySongDetails.get(position).path));
         MainActivity.librarySongDetails.remove(position);
         MainActivity.librarySongName.remove(position);
         Toast.makeText(getApplicationContext(), "Song Removed", Toast.LENGTH_SHORT).show();
