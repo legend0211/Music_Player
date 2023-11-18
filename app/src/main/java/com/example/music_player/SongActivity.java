@@ -46,6 +46,7 @@ public class SongActivity extends FragmentActivity {
     static SeekBar seekBar;
     static MediaPlayer mediaPlayer;
     static Handler handler;
+    static Handler raagaHandler;
     static FavouriteHelper favouriteHelper;
     static LibraryHelper libraryHelper;
     static TextView textTitle, textArtist, textRaagaName, textRaagaTime, textRaagaTherapy;
@@ -57,7 +58,9 @@ public class SongActivity extends FragmentActivity {
     static Song currentSong;
     static int prev_counter = 1, downloaded = 0;
     static String textRaagaInfo = "", raagaName = "", raagaTime = "", raagaTherapy = "";
-    private static long downloadID;
+    private static long downloadID = -1;
+    static String newPath;
+    static Call<ResponseBody> call;
 
 
     @Override
@@ -89,7 +92,7 @@ public class SongActivity extends FragmentActivity {
             else if (position == -2) {
                 Song uploadedSong = new Song();
                 uploadedSong.name = getIntent().getStringExtra("name");
-                uploadedSong.artist = "NULL";
+                uploadedSong.artist = "";
                 uploadedSong.path = getIntent().getStringExtra("path");
                 playSong(getApplicationContext(), uploadedSong);
             }
@@ -168,6 +171,7 @@ public class SongActivity extends FragmentActivity {
         loopToggler = 0;
 
         handler = new Handler();
+        raagaHandler = new Handler();
 
         favouriteHelper = FavouriteHelper.getDB(this);
         libraryHelper = LibraryHelper.getDB(this);
@@ -204,8 +208,6 @@ public class SongActivity extends FragmentActivity {
 //                System.out.println("Next Button Clicked");
                 prev_counter = 1;
                 if(MainActivity.queueSongName.size()!=0) {
-//                    for(int i=0; i<MainActivity.queueSongDetails.size(); i++)
-//                        System.out.print(MainActivity.queueSongDetails.get(i).name +" ");
                     currentSong = MainActivity.queueSongDetails.remove(0);
                     MainActivity.queueSongName.remove(0);
                     playSong(getApplicationContext(), currentSong);
@@ -337,13 +339,15 @@ public class SongActivity extends FragmentActivity {
     }
 
     public static void playSong(Context context, Song newSong) {
+        if(call!=null) {
+            call.cancel();
+        }
         RaagaActivity.ch = 0;
         textRaagaInfo = "";
         raagaName = "";
         raagaTherapy = "";
         raagaTime = "";
         downloaded = 0;
-//        RaagaActivity.raagaInfoText.setText("Loading...");
         if(MainActivity.queueSongName.size()==0 && position!=-2) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             executorService.execute(new Runnable() {
@@ -369,9 +373,9 @@ public class SongActivity extends FragmentActivity {
         }
 
         int randomNumber = new Random().nextInt(3) + 1;
-        if(randomNumber==1)
+        if (randomNumber == 1)
             imageAlbumArt.loadUrl("file:///android_res/raw/pic1.gif");
-        else if(randomNumber==2)
+        else if (randomNumber == 2)
             imageAlbumArt.loadUrl("file:///android_res/raw/pic2.gif");
         else
             imageAlbumArt.loadUrl("file:///android_res/raw/pic3.gif");
@@ -442,85 +446,37 @@ public class SongActivity extends FragmentActivity {
             }
         });
 
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.execute(new Runnable() {
+        ExecutorService executorService3 = Executors.newSingleThreadExecutor();
+        executorService3.execute(new Runnable() {
             @Override
             public void run() {
-                String newPath = "";
-                if(position!=-2 && MainActivity.ch==1) {
-                    newPath = downloadFiles(context);
-                }
-                if(newPath.equals("")) {
-                    newPath = currentSong.path;
-                }
-                System.out.println("New Path : "+newPath);
-
-                File file = new File(newPath);
-                while (downloaded==0) {
-                    try {
-                        System.out.println("Thread");
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                System.out.println("New Path : "+newPath);
-
-                ApiService apiService = ApiService.retrofit.create(ApiService.class);
-                File audioFile = new File(newPath);
-                System.out.println("Size = "+audioFile.length());
-                RequestBody requestFile = RequestBody.create(MediaType.parse("audio/*"), audioFile);
-                MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", audioFile.getName(), requestFile);
-                Call<ResponseBody> call = apiService.uploadAudioFile(body);
-                call.enqueue(new Callback<ResponseBody>() {
+                raagaHandler.removeCallbacksAndMessages(null);
+                raagaHandler.postDelayed(new Runnable() {
                     @Override
-                    public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
-                        System.out.println("Response Code: " + response.code());
-                        try {
-                            JSONObject jsonObject = new JSONObject(response.body().string());
-                            JSONArray thaats = jsonObject.getJSONArray("thaat");
-                            JSONArray times = jsonObject.getJSONArray("time");
-                            JSONArray therapies = jsonObject.getJSONArray("therapy");
-
-                            System.out.println("Thaat: " + thaats.getString(0));
-                            for (int i = 0; i < thaats.length(); i++) {
-                                raagaName += (i+1)+". "+thaats.getString(i)+"\n";
-                            }
-                            if(RaagaActivity.ch == 1) {
-                                textRaagaInfo = raagaName;
-                            }
-                            System.out.println("Time: " + times.getString(0));
-                            for(int i = 0; i < times.length(); i++){
-                                raagaTime += (i+1)+". "+times.getString(i)+"\n";
-                            }
-                            if(RaagaActivity.ch == 2) {
-                                textRaagaInfo = raagaTime;
-                            }
-                            System.out.println("Therapies:");
-                            for (int i = 0; i < therapies.length(); i++) {
-                                raagaTherapy += (i+1)+". "+therapies.getString(i)+"\n";
-                            }
-                            if(RaagaActivity.ch == 3) {
-                                textRaagaInfo = raagaTherapy;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        } finally {
-                            file.delete();
+                    public void run() {
+                        if(call!=null) {
+                            call.cancel();
                         }
-
+                        newPath = "";
+                        if (position != -2 && MainActivity.ch == 1) {
+                            newPath = downloadFiles(context);
+                        }
+                        if (newPath.equals("")) {
+                            newPath = currentSong.path;
+                            apicall();
+                        }
+                        System.out.println("New Path : " + newPath);
                     }
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        t.printStackTrace();
-                    }
-                });
+                }, 500);
             }
         });
     }
 
     public static String downloadFiles(Context context) {
-
+        if(downloadID != -1) {
+            DownloadManager d = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+            d.remove(downloadID);
+        }
         String name = ""+System.currentTimeMillis()+".mp3";
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(currentSong.path));
         request.allowScanningByMediaScanner();
@@ -570,6 +526,58 @@ public class SongActivity extends FragmentActivity {
         }
     }
 
+    public static void apicall() {
+        ApiService apiService = ApiService.retrofit.create(ApiService.class);
+        File audioFile = new File(newPath);
+        System.out.println("Size = " + audioFile.length());
+        RequestBody requestFile = RequestBody.create(MediaType.parse("audio/*"), audioFile);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", audioFile.getName(), requestFile);
+        call = apiService.uploadAudioFile(body);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                System.out.println("Response Code: " + response.code());
+                try {
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    JSONArray thaats = jsonObject.getJSONArray("thaat");
+                    JSONArray times = jsonObject.getJSONArray("time");
+                    JSONArray therapies = jsonObject.getJSONArray("therapy");
+
+                    System.out.println("Thaat: " + thaats.getString(0));
+                    for (int i = 0; i < thaats.length(); i++) {
+                        raagaName += (i + 1) + ". " + thaats.getString(i) + "\n";
+                    }
+                    if (RaagaActivity.ch == 1) {
+                        textRaagaInfo = raagaName;
+                    }
+                    System.out.println("Time: " + times.getString(0));
+                    for (int i = 0; i < times.length(); i++) {
+                        raagaTime += (i + 1) + ". " + times.getString(i) + "\n";
+                    }
+                    if (RaagaActivity.ch == 2) {
+                        textRaagaInfo = raagaTime;
+                    }
+                    System.out.println("Therapies:");
+                    for (int i = 0; i < therapies.length(); i++) {
+                        raagaTherapy += (i + 1) + ". " + therapies.getString(i) + "\n";
+                    }
+                    if (RaagaActivity.ch == 3) {
+                        textRaagaInfo = raagaTherapy;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    audioFile.delete();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -582,7 +590,9 @@ public class SongActivity extends FragmentActivity {
             if (id == downloadID) {
                 // Download completed, you can perform any post-download actions here
                 downloaded = 1;
+                downloadID = -1;
                 System.out.println("File download completed.");
+                apicall();
             }
         }
     }

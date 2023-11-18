@@ -25,7 +25,7 @@ public interface ApiService {
             .build();
 
     Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://192.168.0.2:5000/")
+            .baseUrl("http://192.168.0.7:5000/")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
             .build();
