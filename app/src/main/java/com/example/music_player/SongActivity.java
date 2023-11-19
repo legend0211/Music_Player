@@ -225,7 +225,15 @@ public class SongActivity extends FragmentActivity {
                         MainActivity.queueSongDetails.add(0, currentSong);
                     }
                     currentSong = MainActivity.librarySongDetails.get(prev_counter);
-                    libraryHelper.librarySongDao().delete(new LibrarySong(currentSong.id, currentSong.path));
+
+                    ArrayList<LibrarySong> lib = (ArrayList<LibrarySong>) libraryHelper.librarySongDao().getAllLibrarySongs();
+                    for(int j=lib.size()-1; j>=0; j--) {
+                        System.out.println(lib.get(j).getSongPath());
+                        if(lib.get(j).getSongPath().equals(currentSong.path)) {
+                            libraryHelper.librarySongDao().delete(lib.get(j));
+                            break;
+                        }
+                    }
                     MainActivity.librarySongDetails.remove(prev_counter);
                     MainActivity.librarySongName.remove(prev_counter);
                     prev_counter++;
@@ -433,7 +441,15 @@ public class SongActivity extends FragmentActivity {
                 }
                 for (int i = 0; i < MainActivity.librarySongDetails.size(); i++) {
                     if (MainActivity.librarySongDetails.get(i).path.equals(newSong.path)) {
-                        libraryHelper.librarySongDao().delete(new LibrarySong(currentSong.id, currentSong.path));
+                        ArrayList<LibrarySong> lib = (ArrayList<LibrarySong>) libraryHelper.librarySongDao().getAllLibrarySongs();
+                        for(int j=lib.size()-1; j>=0; j--) {
+                            System.out.println(lib.get(j).getSongPath());
+                            if(lib.get(j).getSongPath().equals(currentSong.path)) {
+                                System.out.println("Entered delete library song");
+                                libraryHelper.librarySongDao().delete(lib.get(j));
+                            }
+                        }
+
                         MainActivity.librarySongDetails.remove(i);
                         MainActivity.librarySongName.remove(i);
                         break;
@@ -527,8 +543,8 @@ public class SongActivity extends FragmentActivity {
     }
 
     public static void apicall() {
-        ApiService apiService = ApiService.retrofit.create(ApiService.class);
         File audioFile = new File(newPath);
+        ApiService apiService = ApiService.retrofit.create(ApiService.class);
         System.out.println("Size = " + audioFile.length());
         RequestBody requestFile = RequestBody.create(MediaType.parse("audio/*"), audioFile);
         MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", audioFile.getName(), requestFile);

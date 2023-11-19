@@ -19,9 +19,9 @@ public interface ApiService {
     Call<ResponseBody> uploadAudioFile(@Part MultipartBody.Part audioFile);
 
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            .connectTimeout(50, TimeUnit.MINUTES)
-            .readTimeout(50, TimeUnit.MINUTES)
-            .writeTimeout(50, TimeUnit.MINUTES)
+            .connectTimeout(2, TimeUnit.MINUTES)
+            .readTimeout(2, TimeUnit.MINUTES)
+            .writeTimeout(2, TimeUnit.MINUTES)
             .build();
 
     Retrofit retrofit = new Retrofit.Builder()

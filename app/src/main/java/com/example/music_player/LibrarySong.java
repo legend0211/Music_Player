@@ -7,12 +7,11 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "library")
 public class LibrarySong {
     @PrimaryKey(autoGenerate = true)
-    private long id;
+    long id;
     @ColumnInfo(name = "path")
-    private String songPath;
-
+    String songPath;
     @ColumnInfo(name = "time")
-    private long time;
+    long time;
 
     LibrarySong(long id, String songPath, long time) {
         this.songPath = songPath;

@@ -41,6 +41,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -52,9 +54,10 @@ public class MainActivity extends AppCompatActivity {
     static Intent intent;
     static Handler handler;
     static TextView textTitle;
+    static TextView textSong;
     static ConstraintLayout miniPlayerLayout;
     static ListView songListView;
-    static ImageView searchButton, myQueueList, favButton, libraryButton, play_pauseButton;
+    static ImageView searchButton, myQueueList, favButton, libraryButton, accountButton, play_pauseButton;
     static Button addButton;
     static FrameLayout frameLayout;
     static File[] songFolderFiles;
@@ -146,7 +149,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -169,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         myQueueList = findViewById(R.id.myQueueList);
         favButton = findViewById(R.id.favourites);
         libraryButton = findViewById(R.id.library);
+        accountButton = findViewById(R.id.account);
         frameLayout = findViewById(R.id.miniPlayerContainer);
 
         nameOfSongs = new ArrayList<>();
@@ -238,6 +241,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 intent = new Intent(MainActivity.this, FavouritesActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        accountButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent = new Intent(MainActivity.this, AccountActivity.class);
                 startActivity(intent);
             }
         });
@@ -346,9 +357,9 @@ public class MainActivity extends AppCompatActivity {
             }
             ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
             songListView.setAdapter(adapter);
+            fav_lib_db();
         }
-
-        if(ch == 1) {
+        else {
             System.out.println("Database");
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReference();
@@ -374,6 +385,7 @@ public class MainActivity extends AppCompatActivity {
                             ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
                             songListView.setAdapter(adapter);
                         }
+                        fav_lib_db();
                     } else {
                         Exception e = task.getException();
                         if (e != null) {
@@ -383,37 +395,47 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
 
-
-        FavouriteHelper favouriteHelper = FavouriteHelper.getDB(getApplicationContext());
-        ArrayList<FavouriteSong> fav = (ArrayList<FavouriteSong>) favouriteHelper.favouriteSongDao().getAllFavoriteSongs();
-        System.out.println("Fav db : "+fav);
-        for(int j=0; j<fav.size(); j++) {
-            for(int i=0; i<songDetails.size(); i++) {
-                if(songDetails.get(i).path.equals(fav.get(j).getSongPath())) {
-                    songDetails.get(i).favourites = true;
-                    Song song = songDetails.get(i);
-                    MainActivity.favouritesSongDetails.add(song);
-                    MainActivity.favouritesSongName.add(song.name);
-                    System.out.println(song.name);
+    public void fav_lib_db() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                FavouriteHelper favouriteHelper = FavouriteHelper.getDB(getApplicationContext());
+                ArrayList<FavouriteSong> fav = (ArrayList<FavouriteSong>) favouriteHelper.favouriteSongDao().getAllFavoriteSongs();
+                System.out.println("Fav db : "+fav);
+                for(int j=0; j<fav.size(); j++) {
+                    for(int i=0; i<songDetails.size(); i++) {
+                        if(songDetails.get(i).path.equals(fav.get(j).getSongPath())) {
+                            songDetails.get(i).favourites = true;
+                            Song song = songDetails.get(i);
+                            MainActivity.favouritesSongDetails.add(song);
+                            MainActivity.favouritesSongName.add(song.name);
+                            System.out.println(song.name);
+                        }
+                    }
                 }
-            }
-        }
 
-        LibraryHelper libraryHelper = LibraryHelper.getDB(getApplicationContext());
-        ArrayList<LibrarySong> lib = (ArrayList<LibrarySong>) libraryHelper.librarySongDao().getAllLibrarySongs();
-        System.out.println("Lib db : "+lib);
-        for(int j=lib.size()-1; j>=0; j--) {
-            System.out.println(lib.get(j).getSongPath());
-            for(int i=0; i<songDetails.size(); i++) {
-                if(songDetails.get(i).path.equals(lib.get(j).getSongPath())) {
-                    Song song = songDetails.get(i);
-                    MainActivity.librarySongDetails.add(song);
-                    MainActivity.librarySongName.add(song.name);
-                    System.out.println(song.name);
+                LibraryHelper libraryHelper = LibraryHelper.getDB(getApplicationContext());
+                ArrayList<LibrarySong> lib = (ArrayList<LibrarySong>) libraryHelper.librarySongDao().getAllLibrarySongs();
+                System.out.println("Lib db : "+lib);
+                for(int j=lib.size()-1; j>=0; j--) {
+                    System.out.println(lib.get(j).getSongPath());
+                    for(int i=0; i<songDetails.size(); i++) {
+                        System.out.println(songDetails.get(i).path);
+                        if(songDetails.get(i).path.equals(lib.get(j).getSongPath())) {
+                            Song song = songDetails.get(i);
+                            MainActivity.librarySongDetails.add(song);
+                            MainActivity.librarySongName.add(song.name);
+                            System.out.println(song.name);
+                        }
+                    }
                 }
+                System.out.println(librarySongName);
+                System.out.println(favouritesSongName);
             }
-        }
+        });
     }
 
     private void showOptionsDialog(int position) {
