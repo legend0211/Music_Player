@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -231,7 +230,6 @@ public class SongActivity extends FragmentActivity {
                         System.out.println(lib.get(j).getSongPath());
                         if(lib.get(j).getSongPath().equals(currentSong.path)) {
                             libraryHelper.librarySongDao().delete(lib.get(j));
-                            break;
                         }
                     }
                     MainActivity.librarySongDetails.remove(prev_counter);
@@ -452,7 +450,6 @@ public class SongActivity extends FragmentActivity {
 
                         MainActivity.librarySongDetails.remove(i);
                         MainActivity.librarySongName.remove(i);
-                        break;
                     }
                 }
                 System.out.println("newSong: "+currentSong.id);
@@ -496,13 +493,16 @@ public class SongActivity extends FragmentActivity {
         String name = ""+System.currentTimeMillis()+".mp3";
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(currentSong.path));
         request.allowScanningByMediaScanner();
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+//        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
+        request.setDestinationInExternalFilesDir(context, context.getCacheDir().getName(), name);
 
         DownloadManager d = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
         downloadID = d.enqueue(request);
         context.registerReceiver(new DownloadReceiver(), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
-        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + File.separator + name;
+//        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + File.separator + name;
+        File file = new File(context.getExternalFilesDir(context.getCacheDir().getName()), name);
+        return file.getAbsolutePath();
     }
 
     public static void playNextSong(Context context) {

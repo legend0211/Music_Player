@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -81,14 +80,15 @@ public class MainActivity extends AppCompatActivity {
         initialisations();
         clickables();
 
-        int currentApiVersion = Build.VERSION.SDK_INT;
-        requestWriteStoragePermission();
-        if(currentApiVersion>=33) {
-            requestStoragePermissionForHigherVersions();
-        }
-        else {
-            requestStoragePermission();
-        }
+        getSongs();
+//        int currentApiVersion = Build.VERSION.SDK_INT;
+//        requestWriteStoragePermission();
+//        if(currentApiVersion>=33) {
+//            requestStoragePermissionForHigherVersions();
+//        }
+//        else {
+//            requestStoragePermission();
+//        }
 
         Runnable runnable = new Runnable() {
             @Override
