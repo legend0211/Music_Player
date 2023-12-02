@@ -94,6 +94,7 @@ public class SongActivity extends FragmentActivity {
                 uploadedSong.artist = "";
                 uploadedSong.path = getIntent().getStringExtra("path");
                 playSong(getApplicationContext(), uploadedSong);
+                favouritesButton.setVisibility(View.GONE);
             }
             else {
                 Song newSong = (Song) getIntent().getSerializableExtra("song");
