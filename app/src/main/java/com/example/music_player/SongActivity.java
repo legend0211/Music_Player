@@ -1,14 +1,12 @@
 package com.example.music_player;
 
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
+import static android.content.ContentValues.TAG;
+
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -52,8 +50,6 @@ public class SongActivity extends FragmentActivity {
     static int duration, position, loopToggler;
     static ArrayList<Song> songDetails;
     static RaagaActivity bottomSheetFragment = new RaagaActivity();
-    public static final MediaType MEDIA_TYPE_AUDIO = MediaType.parse("audio/*");
-    private static final String API_URL = "http://127.0.0.1:5000";
     static Song currentSong;
     static int prev_counter = 1, downloaded = 0;
     static String textRaagaInfo = "", raagaName = "", raagaTime = "", raagaTherapy = "";
@@ -473,7 +469,9 @@ public class SongActivity extends FragmentActivity {
                         }
                         newPath = "";
                         if (position != -2 && MainActivity.ch == 1) {
-                            newPath = downloadFiles(context);
+                            // newPath = downloadFiles(context);
+                            newPath = currentSong.path;
+                            apicallForLink();
                         }
                         if (newPath.equals("")) {
                             newPath = currentSong.path;
@@ -485,27 +483,6 @@ public class SongActivity extends FragmentActivity {
             }
         });
     }
-
-    public static String downloadFiles(Context context) {
-        if(downloadID != -1) {
-            DownloadManager d = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-            d.remove(downloadID);
-        }
-        String name = ""+System.currentTimeMillis()+".mp3";
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(currentSong.path));
-        request.allowScanningByMediaScanner();
-//        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name);
-        request.setDestinationInExternalFilesDir(context, context.getCacheDir().getName(), name);
-
-        DownloadManager d = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-        downloadID = d.enqueue(request);
-        context.registerReceiver(new DownloadReceiver(), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-//        return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + File.separator + name;
-        File file = new File(context.getExternalFilesDir(context.getCacheDir().getName()), name);
-        return file.getAbsolutePath();
-    }
-
     public static void playNextSong(Context context) {
         if(loopToggler == 1) {
             playSong(context, currentSong);
@@ -595,22 +572,90 @@ public class SongActivity extends FragmentActivity {
         });
     }
 
+    public static void apicallForLink() {
+        if (call != null && !call.isExecuted() && !call.isCanceled()) {
+            call.cancel();
+        }
+        ApiService apiService = ApiService.retrofit.create(ApiService.class);
+        Log.d(TAG, "" + newPath);
+        call = apiService.uploadLink(newPath);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
+                System.out.println("Response Code: " + response.code());
+                try {
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    JSONArray thaats = jsonObject.getJSONArray("thaat");
+                    JSONArray times = jsonObject.getJSONArray("time");
+                    JSONArray therapies = jsonObject.getJSONArray("therapy");
+
+                    System.out.println("Thaat: " + thaats.getString(0));
+                    for (int i = 0; i < thaats.length(); i++) {
+                        raagaName += (i + 1) + ". " + thaats.getString(i) + "\n";
+                    }
+                    if (RaagaActivity.ch == 1) {
+                        textRaagaInfo = raagaName;
+                    }
+                    System.out.println("Time: " + times.getString(0));
+                    for (int i = 0; i < times.length(); i++) {
+                        raagaTime += (i + 1) + ". " + times.getString(i) + "\n";
+                    }
+                    if (RaagaActivity.ch == 2) {
+                        textRaagaInfo = raagaTime;
+                    }
+                    System.out.println("Therapies:");
+                    for (int i = 0; i < therapies.length(); i++) {
+                        raagaTherapy += (i + 1) + ". " + therapies.getString(i) + "\n";
+                    }
+                    if (RaagaActivity.ch == 3) {
+                        textRaagaInfo = raagaTherapy;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
     }
 
-    private static class DownloadReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-            if (id == downloadID) {
-                // Download completed, you can perform any post-download actions here
-                downloaded = 1;
-                downloadID = -1;
-                System.out.println("File download completed.");
-                apicall();
-            }
-        }
-    }
+//    public static String downloadFiles(Context context) {
+//        if(downloadID != -1) {
+//            DownloadManager d = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+//            d.remove(downloadID);
+//        }
+//        String name = ""+System.currentTimeMillis()+".mp3";
+//        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(currentSong.path));
+//        request.allowScanningByMediaScanner();
+//        request.setDestinationInExternalFilesDir(context, context.getCacheDir().getName(), name);
+//
+//        DownloadManager d = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+//        downloadID = d.enqueue(request);
+//        context.registerReceiver(new DownloadReceiver(), new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+//
+//        File file = new File(context.getExternalFilesDir(context.getCacheDir().getName()), name);
+//        return file.getAbsolutePath();
+//    }
+
+//    private static class DownloadReceiver extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+//            if (id == downloadID) {
+//                // Download completed, you can perform any post-download actions here
+//                downloaded = 1;
+//                downloadID = -1;
+//                System.out.println("File download completed.");
+//                apicall();
+//            }
+//        }
+//    }
 }
