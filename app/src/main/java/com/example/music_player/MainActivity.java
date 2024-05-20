@@ -1,28 +1,32 @@
 package com.example.music_player;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.OpenableColumns;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -30,34 +34,33 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
-
-
 public class MainActivity extends AppCompatActivity {
-    private final int READ_STORAGE_PERMISSION_REQUEST = 1;
-    private final int WRITE_STORAGE_PERMISSION_REQUEST = 1;
     static Intent intent;
     static Handler handler;
-    static TextView textTitle;
-    static TextView textSong;
-    static ConstraintLayout miniPlayerLayout;
     static ListView songListView;
-    static ImageView searchButton, myQueueList, favButton, libraryButton, accountButton, play_pauseButton;
-    static Button addButton;
+    static ImageView addButton, searchButton, myQueueList, libraryButton, accountButton, allRagasButton, musicGen;
     static FrameLayout frameLayout;
     static File[] songFolderFiles;
     static ArrayList<String> nameOfSongs;
@@ -68,8 +71,20 @@ public class MainActivity extends AppCompatActivity {
     static ArrayList<Song> librarySongDetails = new ArrayList<>();
     static ArrayList<String> favouritesSongName = new ArrayList<>();
     static ArrayList<Song> favouritesSongDetails = new ArrayList<>();
-    File file;
-    static int ch = 1;
+    static int ch = 1, wId = 0;
+    static String weatherNow = "";
+    static String timeNow;
+    static ArrayList<String> nameOfTimeSongs;
+    static ArrayList<Song> timeSongDetails;
+    static LinearLayout timeSongContainer;
+    static ImageView weatherImageView;
+    static ProgressBar progressBar;
+    static RelativeLayout progressBarLayout;
+
+    HashSet<Integer> cloudy;
+    HashSet<Integer> rainy;
+    HashSet<Integer> stormy;
+
 
 
     @Override
@@ -77,36 +92,29 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.miniPlayerContainer, new MiniPlayerActivity()).commit();
+
+        try {
+
+        }
+        catch (Exception e) {}
+
         initialisations();
         clickables();
 
         System.out.println("get");
         getSongs();
-//        int currentApiVersion = Build.VERSION.SDK_INT;
-//        requestWriteStoragePermission();
-//        if(currentApiVersion>=33) {
-//            requestStoragePermissionForHigherVersions();
-//        }
-//        else {
-//            requestStoragePermission();
-//        }
+
+        calenderTimes();
 
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if(SongActivity.currentSong == null) {
+                if (SongActivity.currentSong == null) {
                     frameLayout.setVisibility(View.GONE);
-                }
-                else {
-                    textTitle.setText(SongActivity.currentSong.name);
+                } else {
                     frameLayout.setVisibility(View.VISIBLE);
-                }
-                if(SongActivity.mediaPlayer!=null) {
-                    if (!SongActivity.mediaPlayer.isPlaying()) {
-                        play_pauseButton.setImageResource(R.drawable.ic_play);
-                    } else {
-                        play_pauseButton.setImageResource(R.drawable.ic_pause);
-                    }
                 }
                 handler.postDelayed(this, 100);
             }
@@ -114,81 +122,151 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(runnable, 100);
     }
 
-    @AfterPermissionGranted(READ_STORAGE_PERMISSION_REQUEST)
-    public void requestStoragePermissionForHigherVersions() {
-        String perms = Manifest.permission.READ_MEDIA_AUDIO;
-        if(EasyPermissions.hasPermissions(this, perms)) {
-            getSongs();
-            System.out.println("Has storage permission");
-        }
-        else {
-            EasyPermissions.requestPermissions(this, "Please grant the storage permission", READ_STORAGE_PERMISSION_REQUEST, perms);
-            System.out.println("Doesn't have storage permission");
-        }
-    }
-
-    @AfterPermissionGranted(READ_STORAGE_PERMISSION_REQUEST)
-    public void requestStoragePermission() {
-        String perms = Manifest.permission.READ_EXTERNAL_STORAGE;
-        if(EasyPermissions.hasPermissions(this, perms)) {
-            //Toast.makeText(this, "Permission already granted", Toast.LENGTH_SHORT).show();
-            System.out.println("Has storage permission");
-            getSongs();
-        }
-        else {
-            EasyPermissions.requestPermissions(this, "Please grant the storage permission", READ_STORAGE_PERMISSION_REQUEST, perms);
-            System.out.println("Doesn't have storage permission");
-        }
-    }
-
-    @AfterPermissionGranted(WRITE_STORAGE_PERMISSION_REQUEST)
-    public void requestWriteStoragePermission() {
-        String perms = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-        if (EasyPermissions.hasPermissions(this, perms)) {
-        } else {
-            EasyPermissions.requestPermissions(this, "Please grant the write storage permission", WRITE_STORAGE_PERMISSION_REQUEST, perms);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == READ_STORAGE_PERMISSION_REQUEST) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, now you can get the songs
-                getSongs();
-            } else {
-                // Permission denied
-                Toast.makeText(this, "Permission denied. Cannot access songs.", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     public void initialisations() {
         searchButton = findViewById(R.id.Search);
-        addButton = findViewById(R.id.addButtton);
+        addButton = findViewById(R.id.addButton);
         songListView = findViewById(R.id.songsListView);
         myQueueList = findViewById(R.id.myQueueList);
-        favButton = findViewById(R.id.favourites);
         libraryButton = findViewById(R.id.library);
         accountButton = findViewById(R.id.account);
         frameLayout = findViewById(R.id.miniPlayerContainer);
+        timeSongContainer = findViewById(R.id.itemContainer);
+        weatherImageView = findViewById(R.id.imageViewWeather);
+        allRagasButton = findViewById(R.id.allRagas);
+        musicGen = findViewById(R.id.musicGen);
+        progressBar = findViewById(R.id.progressBar);
+        progressBarLayout = findViewById(R.id.progressBarLayout);
 
         nameOfSongs = new ArrayList<>();
         songDetails = new ArrayList<>();
+        nameOfTimeSongs = new ArrayList<>();
+        timeSongDetails = new ArrayList<>();
+        timeNow = "";
+
+        cloudy = new HashSet<Integer>();
+        cloudy.addAll(Arrays.asList(701, 741, 801, 802, 803, 804));
+
+        rainy = new HashSet<Integer>();
+        rainy.addAll(Arrays.asList(300, 301, 302, 310, 311, 312, 313, 314, 321, 500, 501, 502, 503, 504, 511, 520, 521, 522, 531, 600, 601, 602, 611, 612, 613, 615, 616, 620));
+
+        stormy = new HashSet<Integer>();
+        stormy.addAll(Arrays.asList(200, 201, 202, 210, 211, 212, 221, 230, 231, 232, 621, 622, 762, 771, 781));
 
         handler = new Handler();
 
-        textTitle = findViewById(R.id.miniTextTitle);
-        play_pauseButton = findViewById(R.id.miniPlayButton);
-        miniPlayerLayout = findViewById(R.id.miniPlayer);
+        LocationManager locationManager = (LocationManager) getSystemService(getApplicationContext().LOCATION_SERVICE);
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                fetchWeather(latitude, longitude);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+            }
+        };
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(), "No permission", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3600000, 0, locationListener);
     }
+
+    private void fetchWeather(double latitude, double longitude) {
+        String apiKey = "ac555aea90f9b3b0c87d3b2b3bc18a71";
+        String apiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&appid=" + apiKey;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(apiUrl);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+
+                    int responseCode = connection.getResponseCode();
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuilder response = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                        in.close();
+
+                        JSONArray weatherArray = new JSONObject(response.toString()).getJSONArray("weather");
+                        for (int i = 0; i < weatherArray.length(); i++) {
+                            JSONObject weather = weatherArray.getJSONObject(i);
+                            wId = weather.getInt("id");
+                            // System.out.println("Weather ID: " + weatherId);
+                        }
+                        final int weatherId = wId;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(cloudy.contains(weatherId)) {
+                                    weatherNow = "Cloudy";
+                                    weatherImageView.setImageResource(R.drawable.img_cloudy);
+                                }
+                                else if(rainy.contains(weatherId)) {
+                                    weatherNow = "Rainy";
+                                    weatherImageView.setImageResource(R.drawable.img_rainy);
+                                }
+                                else if(stormy.contains(weatherId)) {
+                                    weatherNow = "Stormy";
+                                    weatherImageView.setImageResource(R.drawable.img_stormy);
+                                }
+                                else {
+                                    weatherNow = "Sunny";
+                                    Calendar calendar = Calendar.getInstance();
+                                    int hour = calendar.get(Calendar.HOUR_OF_DAY);
+                                    if(hour>=18 || hour<=4) {
+                                        weatherImageView.setImageResource(R.drawable.img_clear);
+                                    }
+                                    else {
+                                        weatherImageView.setImageResource(R.drawable.img_sunny);
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        System.out.println("Error: " + responseCode);
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
 
     public void clickables() {
         songListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                progressBar.setVisibility(ProgressBar.VISIBLE);
+                progressBarLayout.setVisibility(RelativeLayout.VISIBLE);
+//                ExecutorService songOpenExecutor = Executors.newSingleThreadExecutor();
+//                songOpenExecutor.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        intent = new Intent(MainActivity.this, SongActivity.class);
+//                        intent.putExtra("song", songDetails.get(position));
+//                        intent.putExtra("position", position);
+//                        startActivity(intent);
+//                    }
+//                });
                 intent = new Intent(MainActivity.this, SongActivity.class);
                 intent.putExtra("song", songDetails.get(position));
                 intent.putExtra("position", position);
@@ -238,14 +316,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        favButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                intent = new Intent(MainActivity.this, FavouritesActivity.class);
-                startActivity(intent);
-            }
-        });
-
         accountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -254,33 +324,60 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        miniPlayerLayout.setOnClickListener(new View.OnClickListener() {
+        weatherImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, SongActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                intent.putExtra("flag", 1);
-                intent.putExtra("loop", SongActivity.loopToggler);
+                intent = new Intent(MainActivity.this, WeatherActivity.class);
                 startActivity(intent);
             }
         });
 
-        play_pauseButton.setOnClickListener(new View.OnClickListener() {
+        allRagasButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-//                System.out.println("play_pauseButton Clicked");
-                if (SongActivity.mediaPlayer.isPlaying()) {
-                    SongActivity.mediaPlayer.pause();
-                    SongActivity.duration = SongActivity.mediaPlayer.getCurrentPosition();
-                    play_pauseButton.setImageResource(R.drawable.ic_play);
-                } else {
-                    SongActivity.mediaPlayer.start();
-                    SongActivity.mediaPlayer.seekTo(SongActivity.duration);
-                    play_pauseButton.setImageResource(R.drawable.ic_pause);
-                    SongActivity.updateSeekBar();
-                }
+            public void onClick(View view) {
+                intent = new Intent(MainActivity.this, AllRagasActivity.class);
+                startActivity(intent);
             }
         });
+
+        musicGen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent = new Intent(MainActivity.this, SongGenerationActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    public void calenderTimes() {
+        Handler calenderHandler = new Handler();
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                String currentTime = "";
+                Calendar calendar = Calendar.getInstance();
+                System.out.println("Date:" + calendar.getTime());
+                int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+                if (hour >= 4 && hour < 6) {
+                    currentTime = "Dawn";
+                } else if (hour >= 6 && hour < 12) {
+                    currentTime = "Morning";
+                } else if (hour >= 12 && hour < 17) {
+                    currentTime = "Afternoon";
+                } else if (hour >= 17 && hour < 20) {
+                    currentTime = "Evening";
+                } else {
+                    currentTime = "Night";
+                }
+
+                if(!currentTime.equals(timeNow)) {
+                    timeNow = currentTime;
+                    getTimeSongs();
+                }
+            }
+        };
+        calenderHandler.postDelayed(runnable, 100);
     }
 
     @Override
@@ -308,6 +405,8 @@ public class MainActivity extends AppCompatActivity {
                     inputStream.close();
                     outputStream.close();
 
+                    progressBar.setVisibility(ProgressBar.VISIBLE);
+                    progressBarLayout.setVisibility(RelativeLayout.VISIBLE);
                     intent = new Intent(MainActivity.this, SongActivity.class);
                     intent.putExtra("path", downloadFile.getPath());
                     intent.putExtra("name", downloadFile.getName());
@@ -340,63 +439,104 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getSongs() {
-        if(ch == 0) {
-            File songFolder = new File(Environment.getExternalStorageDirectory(), "SongFolder");
-            songFolderFiles = songFolder.listFiles();
-            System.out.println("Size = " + songFolderFiles.length);
-            int c = 1;
-            if (songFolderFiles != null) {
-                for (File file : songFolderFiles) {
-                    nameOfSongs.add(file.getName().substring(0, file.getName().length() - 4));
-                    Song song = new Song();
-                    song.id = c++;
-                    song.artist = "";
-                    song.name = nameOfSongs.get(nameOfSongs.size() - 1);
-                    song.path = file.getPath();
-                    songDetails.add(song);
-                }
-            }
-            ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
-            songListView.setAdapter(adapter);
-            fav_lib_db();
-        }
-        else {
-            System.out.println("Database");
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            StorageReference storageRef = storage.getReference();
+        System.out.println("Database");
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference songsCollectionRef = db.collection("songs");
+        songsCollectionRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (DocumentSnapshot document : task.getResult()) {
+                        String documentId = document.getId();
+                        Map<String, Object> songData = document.getData();
+                        Song song = new Song();
+                        song.name = (String) songData.get("songName");
+                        song.name = song.name.substring(0, song.name.lastIndexOf("."));
+                        song.path = songData.get("downloadLink").toString();
+                        song.time = songData.get("playingTime").toString();
+                        song.thaat = songData.get("thaatName").toString();
+                        song.weather = songData.get("weatherType").toString();
 
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            CollectionReference songsCollectionRef = db.collection("Songs");
-            songsCollectionRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        for (DocumentSnapshot document : task.getResult()) {
-                            String documentId = document.getId();
-                            Map<String, Object> songData = document.getData();
-                            Song song = new Song();
-                            song.artist = (String) songData.get("artistName");
-                            song.name = (String) songData.get("songName");
-                            song.path = songData.get("download_link").toString();
+                        songDetails.add(song);
+                        nameOfSongs.add(song.name);
+                        System.out.println(song.path);
 
-                            songDetails.add(song);
-                            nameOfSongs.add((String) songData.get("songName"));
-                            System.out.println(song.path);
-
-                            ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
-                            songListView.setAdapter(adapter);
-                        }
-                        fav_lib_db();
-                    } else {
-                        Exception e = task.getException();
-                        if (e != null) {
-                            e.printStackTrace();
-                        }
+                        ListViewAdapter adapter = new ListViewAdapter(getApplicationContext(), nameOfSongs);
+                        songListView.setAdapter(adapter);
+                    }
+                    fav_lib_db();
+                } else {
+                    Exception e = task.getException();
+                    if (e != null) {
+                        e.printStackTrace();
                     }
                 }
-            });
+            }
+        });
+    }
+
+    public void getTimeSongs() {
+        System.out.println("Database Time");
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference songsCollectionRef = db.collection("thaat");
+        songsCollectionRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    timeSongDetails.clear();
+                    nameOfTimeSongs.clear();
+                    for (DocumentSnapshot document : task.getResult()) {
+                        String documentId = document.getId();
+                        Map<String, Object> songData = document.getData();
+                        Song song = new Song();
+                        song.name = (String) songData.get("songName");
+                        song.path = songData.get("downloadLink").toString();
+                        song.time = songData.get("playingTime").toString();
+                        song.thaat = songData.get("thaatName").toString();
+                        song.weather = songData.get("weatherType").toString();
+                        timeSongDetails.add(song);
+                        nameOfTimeSongs.add(song.name);
+                    }
+                    populateLinearLayout();
+                } else {
+                    Exception e = task.getException();
+                    if (e != null) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    private void populateLinearLayout() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        timeSongContainer.removeAllViews();
+
+        for (int i=0; i<timeSongDetails.size(); i++) {
+            if(timeSongDetails.get(i).time.equals(timeNow)) {
+                String ragaName = nameOfTimeSongs.get(i);
+                LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.list_time_ragas, timeSongContainer, false);
+                TextView textView = linearLayout.findViewById(R.id.textView);
+                textView.setText(ragaName);
+                linearLayout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int index = nameOfTimeSongs.indexOf(ragaName);
+                        if (index != -1 && index < timeSongDetails.size()) {
+                            progressBar.setVisibility(ProgressBar.VISIBLE);
+                            progressBarLayout.setVisibility(RelativeLayout.VISIBLE);
+                            intent = new Intent(MainActivity.this, SongActivity.class);
+                            intent.putExtra("song", timeSongDetails.get(index));
+                            intent.putExtra("position", 0);
+                            startActivity(intent);
+                        }
+                    }
+                });
+                timeSongContainer.addView(linearLayout);
+            }
         }
     }
+
 
     public void fav_lib_db() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -416,17 +556,32 @@ public class MainActivity extends AppCompatActivity {
                             System.out.println(song.name);
                         }
                     }
+                    for(int i=0; i<timeSongDetails.size(); i++) {
+                        if(timeSongDetails.get(i).path.equals(fav.get(j).getSongPath())) {
+                            timeSongDetails.get(i).favourites = true;
+                            Song song = timeSongDetails.get(i);
+                            MainActivity.favouritesSongDetails.add(song);
+                            MainActivity.favouritesSongName.add(song.name);
+                            System.out.println(song.name);
+                        }
+                    }
                 }
 
                 LibraryHelper libraryHelper = LibraryHelper.getDB(getApplicationContext());
                 ArrayList<LibrarySong> lib = (ArrayList<LibrarySong>) libraryHelper.librarySongDao().getAllLibrarySongs();
                 System.out.println("Lib db : "+lib);
                 for(int j=lib.size()-1; j>=0; j--) {
-                    System.out.println(lib.get(j).getSongPath());
                     for(int i=0; i<songDetails.size(); i++) {
-                        System.out.println(songDetails.get(i).path);
                         if(songDetails.get(i).path.equals(lib.get(j).getSongPath())) {
                             Song song = songDetails.get(i);
+                            MainActivity.librarySongDetails.add(song);
+                            MainActivity.librarySongName.add(song.name);
+                            System.out.println(song.name);
+                        }
+                    }
+                    for(int i=0; i<timeSongDetails.size(); i++) {
+                        if(timeSongDetails.get(i).path.equals(lib.get(j).getSongPath())) {
+                            Song song = timeSongDetails.get(i);
                             MainActivity.librarySongDetails.add(song);
                             MainActivity.librarySongName.add(song.name);
                             System.out.println(song.name);
@@ -441,7 +596,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showOptionsDialog(int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Choose an action");
+        builder.setTitle("Choose an action for adding to queue");
 
         final String[] options = {"Add to Beginning", "Add to End"};
 

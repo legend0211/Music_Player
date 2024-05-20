@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,8 +24,10 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class RegisterActivity extends AppCompatActivity {
     EditText editTextEmail, editTextPassword;
-    Button buttonRegister, buttonLogin;
+    TextView buttonRegister, buttonLogin;
     FirebaseAuth mAuth;
+    static ProgressBar progressBar;
+    static RelativeLayout progressBarLayout;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +43,9 @@ public class RegisterActivity extends AppCompatActivity {
         buttonRegister = findViewById(R.id.buttonRegister);
         buttonLogin = findViewById(R.id.buttonLogin);
         mAuth = FirebaseAuth.getInstance();
+
+        progressBar = findViewById(R.id.progressBar);
+        progressBarLayout = findViewById(R.id.progressBarLayout);
     }
 
     public void clickables() {

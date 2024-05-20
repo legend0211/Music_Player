@@ -7,8 +7,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,9 +24,11 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
     EditText editTextEmail, editTextPassword;
-    Button buttonRegister, buttonLogin;
+    TextView buttonRegister, buttonLogin;
     TextView forgotPassword;
     FirebaseAuth mAuth;
+    static ProgressBar progressBar;
+    static RelativeLayout progressBarLayout;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +44,9 @@ public class LoginActivity extends AppCompatActivity {
         buttonLogin = findViewById(R.id.buttonLogin);
         forgotPassword = findViewById(R.id.forgotPassword);
         mAuth = FirebaseAuth.getInstance();
+
+        progressBar = findViewById(R.id.progressBar);
+        progressBarLayout = findViewById(R.id.progressBarLayout);
     }
 
     public void clickables() {

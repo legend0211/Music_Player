@@ -13,6 +13,5 @@ public interface FavouriteSongDao {
     void insert(FavouriteSong favoriteSong);
     @Delete
     void delete(FavouriteSong favoriteSong);
-
 }
 

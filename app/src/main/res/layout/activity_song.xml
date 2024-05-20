@@ -4,54 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@color/background"
     tools:context=".SongActivity">
 
-    <View
-        android:id="@+id/viewSupportForBackground"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
-        android:layout_marginTop="30dp"
-        app:layout_constraintEnd_toEndOf="@id/layoutPlayer"
-        app:layout_constraintStart_toStartOf="@id/layoutPlayer"
-        app:layout_constraintTop_toTopOf="@id/layoutPlayer"/>
+    <RelativeLayout
+        android:id="@+id/progressBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#AA000000"
+        android:elevation="10dp"
+        android:visibility="gone">
 
-    <View
-        android:id="@+id/viewSupportForAlbumArt"
-        android:layout_width="1dp"
-        android:layout_height="1dp"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone"/>
+    </RelativeLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardAlbumArt"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        app:cardCornerRadius="20dp"
+        app:cardBackgroundColor="@color/background"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toTopOf="@id/layoutPlayer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent">
 
-    <View
-        android:id="@+id/view1"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/viewSupportForAlbumArt"
-        app:layout_constraintEnd_toStartOf="@id/viewSupportForAlbumArt"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/imageAlbumArt"
+            android:layout_centerVertical="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/song_img1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <View
-        android:id="@+id/view2"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/viewSupportForBackground"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/view1"
-        app:layout_constraintTop_toBottomOf="@id/view1"/>
+    </androidx.cardview.widget.CardView>
 
-    <WebView
-        android:id="@+id/imageAlbumArt"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        app:layout_constraintBottom_toBottomOf="@id/viewSupportForAlbumArt"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/viewSupportForAlbumArt"
-        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/textTitle"
@@ -62,11 +59,12 @@
         android:layout_marginEnd="20dp"
         android:gravity="center"
         android:text="@string/current_song_title"
+        android:fontFamily="@font/heading_font"
         android:singleLine="true"
-        android:textColor="@color/golden"
+        android:textColor="@color/fontcolor"
         android:textSize="22sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/imageAlbumArt"/>
+        app:layout_constraintTop_toBottomOf="@id/cardAlbumArt"/>
 
     <TextView
         android:id="@+id/textArtist"
@@ -77,9 +75,10 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:text="@string/artist_name"
+        android:fontFamily="@font/body_font"
         android:singleLine="true"
-        android:textColor="@color/golden"
-        android:textSize="18sp"
+        android:textColor="@color/fontcolor"
+        android:textSize="17sp"
         app:layout_constraintTop_toBottomOf="@id/textTitle"/>
 
     <TextView
@@ -88,9 +87,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:text="@string/now_playing"
+        android:fontFamily="@font/body_font"
         android:textAllCaps="true"
-        android:textColor="@color/golden"
-        android:textSize="18sp"
+        android:textColor="@color/fontcolor"
+        android:textSize="17sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -104,7 +104,7 @@
         android:contentDescription="@string/app_name"
         android:rotation="-90"
         android:background="@drawable/ic_up"
-        android:backgroundTint="@color/golden"
+        android:backgroundTint="@color/fontcolor"
         app:layout_constraintBottom_toBottomOf="@id/textNowPlaying"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/textNowPlaying"/>
@@ -116,7 +116,7 @@
         android:layout_marginEnd="25dp"
         android:contentDescription="@string/app_name"
         android:background="@drawable/ic_queue_music"
-        android:backgroundTint="@color/golden"
+        android:backgroundTint="@color/fontcolor"
         app:layout_constraintBottom_toBottomOf="@id/textNowPlaying"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/textNowPlaying"/>
@@ -130,58 +130,90 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <TextView
-            android:id="@+id/textRaagaName"
+            android:id="@+id/textSongDetails"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:paddingBottom="15dp"
             android:paddingTop="10dp"
             android:gravity="bottom|center"
-            android:text="THHAT"
+            android:fontFamily="@font/body_font"
             android:textAllCaps="true"
-            android:textColor="@color/golden"
+            android:textColor="@color/fontcolor"
             android:textSize="15sp"
             android:textStyle="bold"
             android:background="@drawable/player_background_grey"
-            android:backgroundTint="@color/black"
+            android:backgroundTint="@color/background"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/textRaagaTime"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
-        <TextView
-            android:id="@+id/textRaagaTime"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/player_background_grey"
-            android:backgroundTint="@color/black"
-            android:gravity="bottom|center"
-            android:paddingTop="10dp"
-            android:paddingBottom="15dp"
-            android:text="PLAYING TIME"
-            android:textAllCaps="true"
-            android:textColor="@color/golden"
-            android:textSize="15sp"
-            android:textStyle="bold"
+        <ImageView
+            android:id="@+id/upArrow"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/ic_up"
+            android:backgroundTint="@color/fontcolor"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/textRaagaTherapy"
-            app:layout_constraintStart_toEndOf="@id/textRaagaName" />
-
-        <TextView
-            android:id="@+id/textRaagaTherapy"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:paddingBottom="15dp"
-            android:paddingTop="10dp"
-            android:gravity="bottom|center"
-            android:text="THERAPY"
-            android:textAllCaps="true"
-            android:textColor="@color/golden"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:background="@drawable/player_background_grey"
-            android:backgroundTint="@color/black"
-            app:layout_constraintStart_toEndOf="@id/textRaagaTime"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"/>
+
+
+        <!--        <TextView-->
+<!--            android:id="@+id/textRaagaName"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:paddingBottom="15dp"-->
+<!--            android:paddingTop="10dp"-->
+<!--            android:gravity="bottom|center"-->
+<!--            android:text="THHAT"-->
+<!--            android:fontFamily="@font/body_font"-->
+<!--            android:textAllCaps="true"-->
+<!--            android:textColor="@color/fontcolor"-->
+<!--            android:textSize="15sp"-->
+<!--            android:textStyle="bold"-->
+<!--            android:background="@drawable/player_background_grey"-->
+<!--            android:backgroundTint="@color/background"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toStartOf="@id/textRaagaTime"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/textRaagaTime"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/player_background_grey"-->
+<!--            android:backgroundTint="@color/background"-->
+<!--            android:gravity="bottom|center"-->
+<!--            android:paddingTop="10dp"-->
+<!--            android:paddingBottom="15dp"-->
+<!--            android:text="PLAYING TIME"-->
+<!--            android:fontFamily="@font/body_font"-->
+<!--            android:textAllCaps="true"-->
+<!--            android:textColor="@color/fontcolor"-->
+<!--            android:textSize="15sp"-->
+<!--            android:textStyle="bold"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toStartOf="@id/textRaagaTherapy"-->
+<!--            app:layout_constraintStart_toEndOf="@id/textRaagaName" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/textRaagaTherapy"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:paddingBottom="15dp"-->
+<!--            android:paddingTop="10dp"-->
+<!--            android:gravity="bottom|center"-->
+<!--            android:text="THERAPY"-->
+<!--            android:fontFamily="@font/body_font"-->
+<!--            android:textAllCaps="true"-->
+<!--            android:textColor="@color/fontcolor"-->
+<!--            android:textSize="15sp"-->
+<!--            android:textStyle="bold"-->
+<!--            android:background="@drawable/player_background_grey"-->
+<!--            android:backgroundTint="@color/background"-->
+<!--            app:layout_constraintStart_toEndOf="@id/textRaagaTime"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"/>-->
 
         <ImageButton
             android:id="@+id/buttonPlay"
@@ -189,12 +221,12 @@
             android:layout_height="60dp"
             android:layout_marginBottom="30dp"
             android:background="@drawable/play_button_background"
-            android:backgroundTint="@color/golden"
+            android:backgroundTint="@color/fontcolor"
             android:contentDescription="@string/app_name"
             android:padding="12dp"
             android:src="@drawable/ic_pause"
-            app:tint="@color/black"
-            app:layout_constraintBottom_toTopOf="@id/textRaagaTime"
+            app:tint="@color/background"
+            app:layout_constraintBottom_toTopOf="@id/textSongDetails"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"/>
 
@@ -204,7 +236,7 @@
             android:layout_height="45dp"
             android:layout_marginEnd="5dp"
             android:background="@drawable/next_prev_button_background"
-            android:backgroundTint="@color/golden"
+            android:backgroundTint="@color/fontcolor"
             android:contentDescription="@string/app_name"
             android:padding="4dp"
             android:src="@drawable/ic_previous"
@@ -219,7 +251,7 @@
             android:layout_height="45dp"
             android:layout_marginStart="5dp"
             android:background="@drawable/next_prev_button_background"
-            android:backgroundTint="@color/golden"
+            android:backgroundTint="@color/fontcolor"
             android:contentDescription="@string/app_name"
             android:padding="4dp"
             android:src="@drawable/ic_next"
@@ -274,7 +306,7 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="4dp"
             android:text="2:13"
-            android:textColor="@color/golden"
+            android:textColor="@color/fontcolor"
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@id/playerSeekBar"
             app:layout_constraintStart_toStartOf="@id/playerSeekBar"
@@ -289,7 +321,7 @@
             android:layout_marginTop="30dp"
             android:layout_marginBottom="4dp"
             android:text="3:12"
-            android:textColor="@color/golden"
+            android:textColor="@color/fontcolor"
             android:textSize="16sp"
             app:layout_constraintBottom_toTopOf="@id/playerSeekBar"
             app:layout_constraintEnd_toEndOf="@id/playerSeekBar"

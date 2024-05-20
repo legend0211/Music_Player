@@ -1,6 +1,5 @@
 package com.example.music_player;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,25 +10,28 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.util.ArrayList;
 
-public class LibraryActivity extends Activity {
+public class LibraryActivity extends AppCompatActivity {
     ArrayList<Song> songDetails;
+    static Intent intent;
     ImageView backButton;
+    ConstraintLayout favButton;
     ListView librarySongsListView;
     TextView songPresence;
-    ImageView play_pauseButton;
-    TextView textTitle;
-    ConstraintLayout miniPlayerLayout;
     Handler handler = new Handler();
     static FrameLayout frameLayout;
     static LibraryHelper libraryHelper;
-
+    static ProgressBar progressBar;
+    static RelativeLayout progressBarLayout;
 
 
     @Override
@@ -38,6 +40,10 @@ public class LibraryActivity extends Activity {
         setContentView(R.layout.activity_library);
         initialisation();
         clickables();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.miniPlayerContainer, new MiniPlayerActivity()).commit();
+
 
         if(MainActivity.librarySongName.size()==0) {
             songPresence.setVisibility(View.VISIBLE);
@@ -58,15 +64,7 @@ public class LibraryActivity extends Activity {
                     frameLayout.setVisibility(View.GONE);
                 }
                 else {
-                    textTitle.setText(SongActivity.currentSong.name);
                     frameLayout.setVisibility(View.VISIBLE);
-                }
-                if(SongActivity.mediaPlayer!=null) {
-                    if (!SongActivity.mediaPlayer.isPlaying()) {
-                        play_pauseButton.setImageResource(R.drawable.ic_play);
-                    } else {
-                        play_pauseButton.setImageResource(R.drawable.ic_pause);
-                    }
                 }
                 handler.postDelayed(this, 100);
             }
@@ -78,11 +76,11 @@ public class LibraryActivity extends Activity {
         backButton = findViewById(R.id.backButton);
         librarySongsListView = findViewById(R.id.librarySongsListView);
         songPresence = findViewById(R.id.songListPresence);
+        favButton = findViewById(R.id.constraintLayout3);
 
         frameLayout = findViewById(R.id.miniPlayerContainer);
-        textTitle = findViewById(R.id.miniTextTitle);
-        play_pauseButton = findViewById(R.id.miniPlayButton);
-        miniPlayerLayout = findViewById(R.id.miniPlayer);
+        progressBar = findViewById(R.id.progressBar);
+        progressBarLayout = findViewById(R.id.progressBarLayout);
 
         libraryHelper = LibraryHelper.getDB(this);
     }
@@ -94,9 +92,18 @@ public class LibraryActivity extends Activity {
                 finish();
             }
         });
+        favButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intent = new Intent(LibraryActivity.this, FavouritesActivity.class);
+                startActivity(intent);
+            }
+        });
         librarySongsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                progressBar.setVisibility(ProgressBar.VISIBLE);
+                progressBarLayout.setVisibility(RelativeLayout.VISIBLE);
                 Intent intent = new Intent(LibraryActivity.this, SongActivity.class);
                 intent.putExtra("song", MainActivity.librarySongDetails.get(position));
                 intent.putExtra("position", position);
@@ -108,32 +115,6 @@ public class LibraryActivity extends Activity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 showOptionsDialog(i);
                 return true;
-            }
-        });
-        miniPlayerLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LibraryActivity.this, SongActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                intent.putExtra("flag", 1);
-                intent.putExtra("loop", SongActivity.loopToggler);
-                startActivity(intent);
-            }
-        });
-        play_pauseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                System.out.println("play_pauseButton Clicked");
-                if (SongActivity.mediaPlayer.isPlaying()) {
-                    SongActivity.mediaPlayer.pause();
-                    SongActivity.duration = SongActivity.mediaPlayer.getCurrentPosition();
-                    play_pauseButton.setImageResource(R.drawable.ic_play);
-                } else {
-                    SongActivity.mediaPlayer.start();
-                    SongActivity.mediaPlayer.seekTo(SongActivity.duration);
-                    play_pauseButton.setImageResource(R.drawable.ic_pause);
-                    SongActivity.updateSeekBar();
-                }
             }
         });
     }

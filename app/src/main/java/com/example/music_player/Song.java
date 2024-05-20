@@ -6,7 +6,9 @@ public class Song implements Serializable {
     int id;
     String path;
     String name;
-    String artist;
+    String thaat;
+    String time;
+    String weather;
     boolean favourites = false;
 
 }

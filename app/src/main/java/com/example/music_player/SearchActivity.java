@@ -12,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -24,6 +26,8 @@ public class SearchActivity extends Activity {
     TextView songPresence;
     ArrayList<String> filteredList = new ArrayList<>();
     ArrayList<Song> filteredListDetails = new ArrayList<>();
+    static ProgressBar progressBar;
+    static RelativeLayout progressBarLayout;
 
 
     @Override
@@ -42,6 +46,9 @@ public class SearchActivity extends Activity {
         searchEditText = findViewById(R.id.searchBar);
         searchSongsListView = findViewById(R.id.searchSongsListView);
         songPresence = findViewById(R.id.songPresence);
+
+        progressBar = findViewById(R.id.progressBar);
+        progressBarLayout = findViewById(R.id.progressBarLayout);
     }
 
     public void clickables() {
@@ -70,6 +77,8 @@ public class SearchActivity extends Activity {
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 }
 
+                progressBar.setVisibility(ProgressBar.VISIBLE);
+                progressBarLayout.setVisibility(RelativeLayout.VISIBLE);
                 Intent intent = new Intent(SearchActivity.this, SongActivity.class);
                 intent.putExtra("song", filteredListDetails.get(position));
                 intent.putExtra("position", position);
@@ -120,6 +129,6 @@ public class SearchActivity extends Activity {
     public void openKeyboard(EditText editText) {
         editText.requestFocus();
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
     }
 }

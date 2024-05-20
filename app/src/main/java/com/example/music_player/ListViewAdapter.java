@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -45,8 +46,11 @@ public class ListViewAdapter extends BaseAdapter {
         TextView songNameTextView = convertView.findViewById(R.id.songNameTextView);
         songNameTextView.setText(songName);
 
-        // You can set other views in your custom layout here as well.
+        ImageView songImageView = convertView.findViewById(R.id.icon_view);
+        int imageResource = context.getResources().getIdentifier("song_img" + ((position % 12) + 1), "drawable", context.getPackageName());
+        songImageView.setImageResource(imageResource);
 
         return convertView;
     }
+
 }

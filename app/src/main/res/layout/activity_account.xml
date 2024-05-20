@@ -6,7 +6,7 @@
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@color/background"
     tools:context=".MyQueueActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,7 +26,7 @@
             android:layout_marginBottom="15dp"
             android:rotation="-90"
             android:background="@drawable/ic_up"
-            android:backgroundTint="@color/golden"
+            android:backgroundTint="@color/fontcolor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -39,8 +39,9 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
+            android:background="@drawable/square_card_background"
             app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="8dp"
+            app:cardCornerRadius="5dp"
             app:cardElevation="4dp"
             android:backgroundTint="#343434"
             app:layout_constraintEnd_toEndOf="parent"
@@ -54,9 +55,11 @@
                 android:layout_height="match_parent"
                 android:padding="8dp"
                 android:text="Your Account"
+                android:fontFamily="@font/heading_font"
                 android:textAlignment="center"
-                android:textColor="@color/golden"
+                android:textColor="@color/fontcolor"
                 android:textSize="20sp"
+                android:background="@drawable/square_card_background"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/backButton"
@@ -80,11 +83,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:paddingStart="20dp"
-            android:paddingBottom="3dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
             android:text="Account_name"
-            android:textColor="@color/golden"
-            android:textSize="20sp"
+            android:textColor="@color/fontcolor"
+            android:textSize="17sp"
+            android:fontFamily="@font/body_font"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
@@ -94,14 +98,15 @@
             android:id="@+id/logout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="@color/fontcolor"
             android:text="Logout"
-            android:textColor="@color/black"
-            android:backgroundTint="@color/golden"
+            android:fontFamily="@font/heading_font"
+            android:textColor="@color/background"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/userDetails"
-            app:layout_constraintVertical_bias="0.03" />
+            app:layout_constraintVertical_bias="0.932" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

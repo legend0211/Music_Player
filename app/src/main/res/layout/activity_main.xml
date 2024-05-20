@@ -4,28 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@color/background"
     tools:context=".MainActivity">
+
+    <RelativeLayout
+        android:id="@+id/progressBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#AA000000"
+        android:elevation="10dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone"/>
+    </RelativeLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingBottom="5dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:paddingBottom="20dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginTop="20dp"
-            android:background="@mipmap/ic_launcher_round"
-            android:padding="8dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="9dp"
+            android:background="@mipmap/ic_launcher_foreground"
             app:layout_constraintEnd_toStartOf="@+id/iconName"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -34,90 +50,214 @@
             android:id="@+id/iconName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:fontFamily="sans-serif-black"
+            android:layout_marginTop="11dp"
+            android:fontFamily="@font/heading_font"
             android:text="Reverie"
-            android:paddingStart="5dp"
-            android:textColor="@color/golden"
-            android:textSize="40sp"
+            android:textColor="@color/fontcolor"
+            android:textSize="27sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@+id/icon"
             tools:layout_editor_absoluteX="71dp" />
 
         <ImageView
-            android:id="@+id/Search"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
-            android:padding="5dp"
-            android:background="@drawable/ic_search"
-            android:backgroundTint="@color/golden"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/iconName"
+            android:id="@+id/addButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:src="@drawable/add_button"
+            android:layout_gravity="center"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.515" />
+            app:layout_constraintEnd_toStartOf="@id/Search"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageView
+            android:id="@+id/Search"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/ic_search"
+            android:backgroundTint="@color/fontcolor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/account"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/account"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/user"
+            android:backgroundTint="@color/fontcolor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout3"
+        android:id="@+id/constraintLayout5"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/constraintLayout2"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toTopOf="@id/constraintLayout4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/constraintLayout">
 
         <TextView
+            android:id="@+id/songsTimeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rhythms Of Time"
+            android:fontFamily="@font/heading_font"
+            android:textColor="@color/fontcolor"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:textSize="22sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/timeScrollView"/>
+
+        <HorizontalScrollView
+            android:id="@+id/timeScrollView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/mini_player_background"
+            android:backgroundTint="@android:color/transparent"
+            android:orientation="horizontal"
+            android:scrollbars="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/songsTimeTextView"
+            tools:ignore="SpeakableTextPresentCheck">
+
+            <LinearLayout
+                android:id="@+id/itemContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="5dp"
+                android:paddingStart="20dp">
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintBottom_toTopOf="@id/constraintLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintLayout5">
+
+
+        <TextView
+            android:id="@+id/songsWeatherTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Climate Chords"
+            android:fontFamily="@font/heading_font"
+            android:textColor="@color/fontcolor"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_gravity="top"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewWeather"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="16:9"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/songsWeatherTextView">
+
+            <FrameLayout
+                android:id="@+id/frameLayoutWeather"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imageViewWeather"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/img_sunny" />
+            </FrameLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:id="@+id/constraintLayout3"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/constraintLayoutMini"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintLayout4">
+
+        <TextView
             android:id="@+id/songsHeaderTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="20dp"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
             android:text="Songs"
-            android:fontFamily="sans-serif"
-            android:textColor="@color/golden"
-            android:textSize="25sp"
-            android:textStyle="bold"
+            android:fontFamily="@font/heading_font"
+            android:textColor="@color/fontcolor"
+            android:textSize="22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/addButtton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="22dp"
-            android:background="@drawable/ic_add_circle"
-            android:backgroundTint="@color/golden"
-            app:layout_constraintBottom_toTopOf="@+id/songsListView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1"
-            app:layout_constraintStart_toEndOf="@id/songsHeaderTextView"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
-
         <ListView
             android:id="@+id/songsListView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
-            android:background="@drawable/mini_player_background"
-            android:backgroundTint="@color/black"
-            app:layout_constraintBottom_toTopOf="@+id/miniPlayerContainer"
+            android:background="@android:color/transparent"
+            android:backgroundTint="@android:color/transparent"
+            android:divider="@null"
+            android:fontFamily="@font/body_font"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/songsHeaderTextView" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayoutMini"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/constraintLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/constraintLayout3">
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="15dp"
             android:layout_marginTop="5dp"
             android:id="@+id/miniPlayerContainer"
             android:layout_alignParentBottom="true"
@@ -131,64 +271,60 @@
                 android:layout_height="wrap_content"
                 android:visibility="visible" />
         </FrameLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="7dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:background="@color/bottomPanelMiniPlayer"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
-            android:id="@+id/favourites"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:src="@drawable/ic_favorite_on"
-            app:layout_constraintEnd_toStartOf="@+id/myQueueList"
+            android:id="@+id/musicGen"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="50dp"
+            android:background="@drawable/music_generation"
+            android:backgroundTint="@color/fontcolor"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
+            android:id="@+id/allRagas"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/all_ragas"
+            android:backgroundTint="@color/fontcolor"
+            app:layout_constraintEnd_toStartOf="@+id/myQueueList"
+            app:layout_constraintStart_toEndOf="@+id/musicGen"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageView
             android:id="@+id/myQueueList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:background="@drawable/ic_queue_music"
-            android:backgroundTint="@color/golden"
+            android:backgroundTint="@color/fontcolor"
             app:layout_constraintEnd_toStartOf="@+id/library"
-            app:layout_constraintStart_toEndOf="@+id/favourites"
+            app:layout_constraintStart_toEndOf="@+id/allRagas"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
             android:id="@+id/library"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="50dp"
             android:background="@drawable/ic_library"
-            android:backgroundTint="@color/golden"
-            app:layout_constraintEnd_toStartOf="@+id/account"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/myQueueList"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <ImageView
-            android:id="@+id/account"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:background="@drawable/ic_account"
-            android:backgroundTint="@color/golden"
+            android:backgroundTint="@color/fontcolor"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/library"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />
 

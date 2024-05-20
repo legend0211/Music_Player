@@ -1,6 +1,5 @@
 package com.example.music_player;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,24 +9,25 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
-public class FavouritesActivity extends Activity {
+public class FavouritesActivity extends AppCompatActivity {
     static ArrayList<Song> songDetails;
     static ImageView backButton;
     static ListView favouritesSongsListView;
     static TextView songPresence;
-    static ImageView play_pauseButton;
-    static TextView textTitle;
-    static ConstraintLayout miniPlayerLayout;
     Handler handler = new Handler();
     static FrameLayout frameLayout;
     static FavouriteHelper favouriteHelper;
+    static ProgressBar progressBar;
+    static RelativeLayout progressBarLayout;
 
 
     @Override
@@ -36,6 +36,9 @@ public class FavouritesActivity extends Activity {
         setContentView(R.layout.activity_favourites);
         initialisation();
         clickables();
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.miniPlayerContainer, new MiniPlayerActivity()).commit();
 
         if(MainActivity.favouritesSongName.size()==0) {
             songPresence.setVisibility(View.VISIBLE);
@@ -56,15 +59,7 @@ public class FavouritesActivity extends Activity {
                     frameLayout.setVisibility(View.GONE);
                 }
                 else {
-                    textTitle.setText(SongActivity.currentSong.name);
                     frameLayout.setVisibility(View.VISIBLE);
-                }
-                if(SongActivity.mediaPlayer!=null) {
-                    if (!SongActivity.mediaPlayer.isPlaying()) {
-                        play_pauseButton.setImageResource(R.drawable.ic_play);
-                    } else {
-                        play_pauseButton.setImageResource(R.drawable.ic_pause);
-                    }
                 }
                 handler.postDelayed(this, 100);
             }
@@ -78,9 +73,8 @@ public class FavouritesActivity extends Activity {
         songPresence = findViewById(R.id.songListPresence);
 
         frameLayout = findViewById(R.id.miniPlayerContainer);
-        textTitle = findViewById(R.id.miniTextTitle);
-        play_pauseButton = findViewById(R.id.miniPlayButton);
-        miniPlayerLayout = findViewById(R.id.miniPlayer);
+        progressBar = findViewById(R.id.progressBar);
+        progressBarLayout = findViewById(R.id.progressBarLayout);
 
         favouriteHelper = FavouriteHelper.getDB(this);
     }
@@ -95,6 +89,8 @@ public class FavouritesActivity extends Activity {
         favouritesSongsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                progressBar.setVisibility(ProgressBar.VISIBLE);
+                progressBarLayout.setVisibility(RelativeLayout.VISIBLE);
                 Intent intent = new Intent(FavouritesActivity.this, SongActivity.class);
                 intent.putExtra("song", MainActivity.favouritesSongDetails.get(position));
                 intent.putExtra("position", position);
@@ -106,32 +102,6 @@ public class FavouritesActivity extends Activity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 showOptionsDialog(i);
                 return true;
-            }
-        });
-        miniPlayerLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(FavouritesActivity.this, SongActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                intent.putExtra("flag", 1);
-                intent.putExtra("loop", SongActivity.loopToggler);
-                startActivity(intent);
-            }
-        });
-        play_pauseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                System.out.println("play_pauseButton Clicked");
-                if (SongActivity.mediaPlayer.isPlaying()) {
-                    SongActivity.mediaPlayer.pause();
-                    SongActivity.duration = SongActivity.mediaPlayer.getCurrentPosition();
-                    play_pauseButton.setImageResource(R.drawable.ic_play);
-                } else {
-                    SongActivity.mediaPlayer.start();
-                    SongActivity.mediaPlayer.seekTo(SongActivity.duration);
-                    play_pauseButton.setImageResource(R.drawable.ic_pause);
-                    SongActivity.updateSeekBar();
-                }
             }
         });
     }
@@ -152,7 +122,8 @@ public class FavouritesActivity extends Activity {
     }
 
     private void removeItem(int position) {
-        favouriteHelper.favouriteSongDao().delete(new FavouriteSong(MainActivity.favouritesSongDetails.get(position).id, MainActivity.favouritesSongDetails.get(position).path));
+//        favouriteHelper.favouriteSongDao().delete(new FavouriteSong(MainActivity.favouritesSongDetails.get(position).id, MainActivity.favouritesSongDetails.get(position).path));
+        favouriteHelper.favouriteSongDao().delete(new FavouriteSong(MainActivity.favouritesSongDetails.get(position).path));
         MainActivity.favouritesSongDetails.get(position).favourites = false;
         MainActivity.favouritesSongDetails.remove(position);
         MainActivity.favouritesSongName.remove(position);

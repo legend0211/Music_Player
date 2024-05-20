@@ -24,6 +24,16 @@ public interface ApiService {
     @POST("/link")
     Call<ResponseBody> uploadLink(@Field("link") String link);
 
+    @Multipart
+    @FormUrlEncoded
+    @POST("/")
+    Call<ResponseBody> generateSongLink(@Field("Prompt") String prompt, @Field("link") String link);
+
+    @Multipart
+    @FormUrlEncoded
+    @POST("/link")
+    Call<ResponseBody> generateSongAudioFile(@Field("Prompt") String prompt, @Part MultipartBody.Part audioFile);
+
 
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .connectTimeout(2, TimeUnit.MINUTES)
@@ -32,7 +42,7 @@ public interface ApiService {
             .build();
 
     Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://192.168.0.5:5000")
+            .baseUrl("http://192.168.0.8:5000")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
             .build();
